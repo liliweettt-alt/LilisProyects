@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive | Script Repository</title>
+    <title>The Archive V2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono&display=swap');
         
         body { 
-            background-color: #0c0a09; 
-            color: #d6d3d1; 
-            /* Subtle grid background for that "blueprint" feel */
+            background-color: #0c0a09; color: #d6d3d1; 
             background-image: radial-gradient(#292524 1px, transparent 1px);
             background-size: 24px 24px;
         }
@@ -20,15 +18,14 @@
         
         .archive-card {
             background: linear-gradient(145deg, #1c1917, #0c0a09);
-            border-left: 4px solid #78716c;
-            transition: transform 0.2s ease;
+            border-left: 4px solid #78716c; cursor: pointer; transition: all 0.2s ease;
         }
-        .archive-card:hover { transform: translateX(4px); border-left-color: #a8a29e; }
+        .archive-card:hover { transform: translateY(-2px); border-left-color: #d6d3d1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
         
         .input-field { 
-            width: 100%; background-color: #1c1917; padding: 0.75rem; 
+            width: 100%; background-color: #151312; padding: 0.75rem; 
             border-radius: 0.25rem; border: 1px solid #44403c; color: #f5f5f4; 
-            margin-bottom: 1rem; font-family: 'Space Mono', monospace; font-size: 0.875rem;
+            font-family: 'Space Mono', monospace; font-size: 0.875rem;
         }
         .input-field:focus { outline: none; border-color: #a8a29e; box-shadow: inset 0 0 5px rgba(168, 162, 158, 0.2); }
         
@@ -37,171 +34,262 @@
             cursor: pointer; text-align: center; text-transform: uppercase; 
             letter-spacing: 0.05em; font-size: 0.8rem; font-family: 'Space Mono', monospace;
         }
-        .btn-primary { background-color: #44403c; color: #f5f5f4; border: 1px solid #78716c; transition: all 0.2s; }
-        .btn-primary:hover { background-color: #57534e; }
-        .btn-danger { background-color: #450a0a; color: #fca5a5; border: 1px solid #991b1b; transition: all 0.2s;}
-        .btn-danger:hover { background-color: #7f1d1d; color: white;}
+        .btn-primary { background-color: #292524; color: #f5f5f4; border: 1px solid #78716c; transition: all 0.2s; }
+        .btn-primary:hover { background-color: #44403c; }
+        .btn-success { background-color: #14532d; color: #bbf7d0; border: 1px solid #166534; transition: all 0.2s; }
+        .btn-success:hover { background-color: #166534; }
         
-        .tag-badge { 
-            background-color: #292524; border: 1px solid #57534e; 
-            padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.7rem; 
-            font-family: 'Space Mono', monospace; text-transform: lowercase;
+        .tab-btn {
+            padding: 0.75rem 1.5rem; border-bottom: 2px solid transparent; 
+            color: #78716c; font-family: 'Cinzel', serif; font-weight: bold; font-size: 1.1rem;
+            transition: all 0.2s; cursor: pointer;
         }
+        .tab-btn.active { color: #d6d3d1; border-bottom-color: #d6d3d1; }
+        .tab-btn:hover:not(.active) { color: #a8a29e; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden-view { display: none !important; }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-5xl mx-auto">
+<body class="p-4 md:p-8 max-w-5xl mx-auto min-h-screen flex flex-col">
 
-    <header class="mb-10 border-b border-stone-800 pb-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+    <header class="mb-8 border-b border-stone-800 pb-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
         <div>
             <h1 class="text-4xl font-bold text-stone-200 tracking-wider">The Archive</h1>
-            <p class="font-mono text-stone-500 text-sm mt-2">Classified Script Repository // v1.0</p>
+            <p class="font-mono text-stone-500 text-sm mt-2"> Script Repository</p>
         </div>
-        <div class="mt-4 md:mt-0 space-x-2 flex">
-            <div>
+        <div class="mt-4 md:mt-0 flex gap-3">
+            <button onclick="openEditor()" class="btn btn-success">+ Initialize New Record</button>
+            <div class="border-l border-stone-800 pl-3 flex gap-2">
                 <input type="file" id="fileInput" accept=".json" class="hidden"/>
-                <button onclick="document.getElementById('fileInput').click()" class="btn btn-primary">Import Data</button>
+                <button onclick="document.getElementById('fileInput').click()" class="btn btn-primary text-xs">Import</button>
+                <button onclick="exportData()" class="btn btn-primary text-xs">Backup</button>
             </div>
-            <button onclick="exportData()" class="btn btn-primary">Export Backup</button>
         </div>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <main id="view-dashboard" class="flex-grow">
+        <div class="flex justify-between items-end mb-4 border-b border-stone-800 pb-2">
+            <h2 class="text-2xl font-bold text-stone-300">Indexed Realities</h2>
+            <span class="font-mono text-xs text-stone-500" id="itemCount">0 Records Found</span>
+        </div>
+        <div id="itemList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+    </main>
+
+    <main id="view-editor" class="flex-grow hidden-view bg-stone-900/50 p-6 rounded-lg border border-stone-800 backdrop-blur-sm shadow-2xl">
+        <div class="flex justify-between items-center mb-6 border-b border-stone-700 pb-4">
+            <h2 class="text-2xl font-bold text-stone-200" id="editorTitle">Initialize Record</h2>
+            <div class="space-x-2">
+                <button onclick="closeEditor()" class="btn btn-primary bg-stone-800">Cancel</button>
+                <button onclick="saveRecord()" class="btn btn-success">Save to Archive</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="md:col-span-2">
+                <label class="font-mono text-xs text-stone-500 mb-1 block">Destination Universe / Title</label>
+                <input type="text" id="inpTitle" placeholder="e.g., Hogwarts Year 4" class="input-field" required>
+            </div>
+            <div>
+                <label class="font-mono text-xs text-stone-500 mb-1 block">Tags (comma separated)</label>
+                <input type="text" id="inpTags" placeholder="magic, safe..." class="input-field">
+            </div>
+        </div>
+
+        <div class="flex border-b border-stone-700 mb-6 overflow-x-auto">
+            <button onclick="switchTab('tab-blueprint')" id="btn-blueprint" class="tab-btn active">The Blueprint</button>
+            <button onclick="switchTab('tab-avatar')" id="btn-avatar" class="tab-btn">The Avatar</button>
+            <button onclick="switchTab('tab-code')" id="btn-code" class="tab-btn">The Code</button>
+            <button onclick="switchTab('tab-roster')" id="btn-roster" class="tab-btn">The Roster</button>
+        </div>
+
+        <div id="tab-blueprint" class="tab-content active">
+            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Setting, Timeline, Lore & Current Events</label>
+            <textarea id="inpBlueprint" class="input-field min-h-[300px]" placeholder="Describe the world, where you wake up, what year it is..."></textarea>
+        </div>
+
+        <div id="tab-avatar" class="tab-content">
+            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Identity, Appearance, Skills & Backstory</label>
+            <textarea id="inpAvatar" class="input-field min-h-[300px]" placeholder="Your name, age, physical traits, magical abilities, personal history..."></textarea>
+        </div>
+
+        <div id="tab-code" class="tab-content">
+            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Safewords, Time Ratios & System Rules</label>
+            <textarea id="inpCode" class="input-field min-h-[300px]" placeholder="1 hour in CR = 1 week in DR. Safe word is 'Jumanji'. I am immune to permanent harm..."></textarea>
+        </div>
+
+        <div id="tab-roster" class="tab-content">
+            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Relationships, Friends, Foes & Family</label>
+            <textarea id="inpRoster" class="input-field min-h-[300px]" placeholder="List the people in your life and your relationship dynamics with them..."></textarea>
+        </div>
         
-        <div class="md:col-span-1 space-y-6">
-            <div class="bg-stone-900/80 p-6 rounded shadow-lg border border-stone-800 backdrop-blur-sm">
-                <h2 class="text-xl font-bold mb-4 text-stone-300 border-b border-stone-800 pb-2">Log New Reality</h2>
-                <form id="dataForm">
-                    <label class="font-mono text-xs text-stone-500 mb-1 block">Destination / Universe</label>
-                    <input type="text" id="inpTitle" placeholder="e.g., Hogwarts, MCU..." class="input-field" required>
-                    
-                    <label class="font-mono text-xs text-stone-500 mb-1 block">Avatar Name</label>
-                    <input type="text" id="inpAvatar" placeholder="Your name in the DR" class="input-field" required>
-
-                    <label class="font-mono text-xs text-stone-500 mb-1 block">Tags (comma separated)</label>
-                    <input type="text" id="inpTags" placeholder="fantasy, magic, comfort..." class="input-field">
-
-                    <label class="font-mono text-xs text-stone-500 mb-1 block">Script Blueprint</label>
-                    <textarea id="inpDesc" placeholder="Physical traits, safe words, relationships, rules..." class="input-field" rows="6" required></textarea>
-                    
-                    <button type="submit" class="btn btn-primary w-full mt-2">Commit to Archive</button>
-                </form>
-            </div>
-            
-            <div class="bg-stone-950 p-6 rounded border border-red-900/30">
-                <button onclick="clearData()" class="btn btn-danger w-full">Purge Entire Archive</button>
-            </div>
+        <div class="mt-6 flex justify-between items-center border-t border-stone-700 pt-4">
+            <button id="btnDelete" onclick="deleteCurrentRecord()" class="text-red-900 hover:text-red-500 font-mono text-xs transition-colors hidden">PURGE RECORD</button>
+            <span class="font-mono text-xs text-stone-600" id="lastEditedText"></span>
         </div>
-
-        <div class="md:col-span-2">
-            <div class="flex justify-between items-end mb-4 border-b border-stone-800 pb-2">
-                <h2 class="text-2xl font-bold text-stone-300">Indexed Scripts</h2>
-                <span class="font-mono text-xs text-stone-500" id="itemCount">0 Records Found</span>
-            </div>
-            
-            <div id="itemList" class="space-y-4">
-                </div>
-        </div>
-    </div>
+    </main>
 
     <script>
         let appData = [];
-        const STORAGE_KEY = 'archive_dr_scripts';
+        const STORAGE_KEY = 'archive_dr_scripts_v2';
+        let currentEditingId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 try { appData = JSON.parse(stored); } 
-                catch(e) { console.error("Data load error", e); appData = []; }
+                catch(e) { appData = []; }
             }
-            renderList();
-            
-            document.getElementById('dataForm').addEventListener('submit', handleFormSubmit);
             document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            renderDashboard();
         });
 
         function saveData() { 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); 
-            renderList(); 
+            renderDashboard(); 
         }
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            // Process tags into an array, removing extra spaces
-            const rawTags = document.getElementById('inpTags').value;
-            const tagsArray = rawTags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
-
-            const newItem = {
-                id: crypto.randomUUID(),
-                title: document.getElementById('inpTitle').value,
-                avatar: document.getElementById('inpAvatar').value,
-                tags: tagsArray,
-                description: document.getElementById('inpDesc').value,
-                dateAdded: new Date().toISOString()
-            };
-            
-            appData.unshift(newItem);
-            saveData();
-            e.target.reset();
-        }
-
-        function renderList() {
+        function renderDashboard() {
             const listContainer = document.getElementById('itemList');
-            const countLabel = document.getElementById('itemCount');
+            document.getElementById('itemCount').innerText = `${appData.length} Records Found`;
             listContainer.innerHTML = '';
             
-            countLabel.innerText = `${appData.length} Records Found`;
-
             if (appData.length === 0) {
-                listContainer.innerHTML = '<p class="font-mono text-stone-600 text-sm mt-8 text-center border border-dashed border-stone-800 p-8 rounded">The archive is currently empty. Awaiting first input...</p>';
+                listContainer.innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-10 border border-dashed border-stone-800 rounded"><p class="font-mono text-stone-600 text-sm">The archive is empty. Initialize a new record.</p></div>';
                 return;
             }
 
             appData.forEach(item => {
-                const dateObj = new Date(item.dateAdded);
+                const dateObj = new Date(item.lastEdited || item.dateAdded);
                 
-                // Generate HTML for tags
                 let tagsHtml = '';
                 if(item.tags && item.tags.length > 0) {
                     tagsHtml = `<div class="mt-3 flex flex-wrap gap-2">` + 
-                        item.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('') + 
+                        item.tags.map(tag => `<span class="bg-stone-800 text-stone-400 border border-stone-700 px-2 py-0.5 rounded-full font-mono text-[10px] lowercase">${tag}</span>`).join('') + 
                         `</div>`;
                 }
 
                 const div = document.createElement('div');
-                div.className = 'archive-card p-5 rounded border border-stone-800 flex justify-between items-start';
+                div.className = 'archive-card p-5 rounded border border-stone-800 flex flex-col justify-between';
+                div.onclick = () => openEditor(item.id); // Clicking card opens editor
                 div.innerHTML = `
-                    <div class="w-full pr-4">
-                        <div class="flex justify-between items-baseline mb-1">
-                            <h3 class="font-bold text-xl text-stone-200">${item.title}</h3>
-                            <span class="font-mono text-xs text-stone-500">${dateObj.toLocaleDateString()}</span>
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-xl text-stone-200 leading-tight">${item.title}</h3>
                         </div>
-                        <p class="font-mono text-sm text-amber-600/80 mb-3">Avatar: ${item.avatar}</p>
-                        <p class="text-sm text-stone-400 whitespace-pre-wrap">${item.description}</p>
+                        <p class="font-mono text-xs text-stone-500 line-clamp-2 mt-2">${item.blueprint || 'No blueprint data...'}</p>
                         ${tagsHtml}
                     </div>
-                    <button onclick="deleteItem('${item.id}')" class="text-red-900 hover:text-red-500 font-mono text-xs mt-1 transition-colors" title="Delete Script">✖</button>
+                    <div class="mt-4 pt-3 border-t border-stone-800 flex justify-between items-center">
+                        <span class="font-mono text-[10px] text-stone-600">Last accessed: ${dateObj.toLocaleDateString()}</span>
+                        <span class="font-mono text-xs text-amber-700/80 group-hover:text-amber-500 transition-colors">ACCESS RECORD ></span>
+                    </div>
                 `;
                 listContainer.appendChild(div);
             });
         }
 
-        function deleteItem(id) {
-            if(confirm("Classified action: Are you sure you want to permanently erase this record?")) {
-                appData = appData.filter(item => item.id !== id);
-                saveData();
+        function openEditor(id = null) {
+            currentEditingId = id;
+            const viewDash = document.getElementById('view-dashboard');
+            const viewEdit = document.getElementById('view-editor');
+            const btnDelete = document.getElementById('btnDelete');
+            const lastEditedText = document.getElementById('lastEditedText');
+            
+            viewDash.classList.add('hidden-view');
+            viewEdit.classList.remove('hidden-view');
+
+            switchTab('tab-blueprint');
+
+            if (id) {
+                const script = appData.find(s => s.id === id);
+                document.getElementById('editorTitle').innerText = "Edit Record";
+                document.getElementById('inpTitle').value = script.title || '';
+                document.getElementById('inpTags').value = (script.tags || []).join(', ');
+                document.getElementById('inpBlueprint').value = script.blueprint || '';
+                document.getElementById('inpAvatar').value = script.avatar || '';
+                document.getElementById('inpCode').value = script.code || '';
+                document.getElementById('inpRoster').value = script.roster || '';
+                
+                btnDelete.classList.remove('hidden');
+                const dateStr = new Date(script.lastEdited || script.dateAdded).toLocaleString();
+                lastEditedText.innerText = `Record modified: ${dateStr}`;
+            } else {
+                document.getElementById('editorTitle').innerText = "Initialize Record";
+                document.getElementById('inpTitle').value = '';
+                document.getElementById('inpTags').value = '';
+                document.getElementById('inpBlueprint').value = '';
+                document.getElementById('inpAvatar').value = '';
+                document.getElementById('inpCode').value = '';
+                document.getElementById('inpRoster').value = '';
+                
+                btnDelete.classList.add('hidden');
+                lastEditedText.innerText = `New Record Initiation...`;
             }
         }
 
+        function closeEditor() {
+            document.getElementById('view-editor').classList.add('hidden-view');
+            document.getElementById('view-dashboard').classList.remove('hidden-view');
+            currentEditingId = null;
+        }
+
+        function saveRecord() {
+            const title = document.getElementById('inpTitle').value;
+            if(!title) { alert("Destination Universe/Title is required."); return; }
+
+            const rawTags = document.getElementById('inpTags').value;
+            const tagsArray = rawTags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
+
+            const scriptData = {
+                title: title,
+                tags: tagsArray,
+                blueprint: document.getElementById('inpBlueprint').value,
+                avatar: document.getElementById('inpAvatar').value,
+                code: document.getElementById('inpCode').value,
+                roster: document.getElementById('inpRoster').value,
+                lastEdited: new Date().toISOString()
+            };
+
+            if (currentEditingId) {
+                const index = appData.findIndex(s => s.id === currentEditingId);
+                if(index !== -1) {
+                    appData[index] = { ...appData[index], ...scriptData };
+                }
+            } else {
+                scriptData.id = crypto.randomUUID();
+                scriptData.dateAdded = scriptData.lastEdited;
+                appData.unshift(scriptData);
+            }
+
+            saveData();
+            closeEditor();
+        }
+
+        function deleteCurrentRecord() {
+            if(!currentEditingId) return;
+            if(confirm("Classified action: Are you sure you want to permanently erase this record?")) {
+                appData = appData.filter(item => item.id !== currentEditingId);
+                saveData();
+                closeEditor();
+            }
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById(`btn-${tabId.split('-')[1]}`).classList.add('active');
+        }
         function exportData() { 
             if (appData.length === 0) { alert("No records to export."); return; }
-            const dataStr = JSON.stringify({ database_version: "1.0", archive_items: appData }, null, 2);
+            const dataStr = JSON.stringify({ database_version: "2.0", archive_items: appData }, null, 2);
             const a = document.createElement('a'); 
             a.href = "data:text/json;charset=utf-8," + encodeURIComponent(dataStr); 
-            a.download = "The_Archive_Backup.json"; 
-            document.body.appendChild(a); 
-            a.click(); 
-            a.remove(); 
+            a.download = "The_Archive_Backup_V2.json"; 
+            document.body.appendChild(a); a.click(); a.remove(); 
         }
 
         function handleFileUpload(e) { 
@@ -214,18 +302,9 @@
                     appData = Array.isArray(parsedData) ? parsedData : (parsedData.archive_items || []); 
                     saveData(); 
                     document.getElementById('fileInput').value = ''; 
-                } catch(err) {
-                    alert("System Error: Invalid backup file structure.");
-                } 
+                } catch(err) { alert("System Error: Invalid backup file structure."); } 
             }; 
             reader.readAsText(file); 
-        }
-
-        function clearData() { 
-            if(confirm("CRITICAL WARNING: This will permanently purge the entire archive. Proceed?")) { 
-                appData = []; 
-                saveData(); 
-            } 
         }
     </script>
 </body>
