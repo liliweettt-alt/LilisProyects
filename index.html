@@ -3,139 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive V2</title>
+    <title>The Archive | Script Repository V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
         
         body { 
-            background-color: #0c0a09; color: #d6d3d1; 
-            background-image: radial-gradient(#292524 1px, transparent 1px);
-            background-size: 24px 24px;
+            background-color: #0f1115; color: #e2e8f0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        h1, h2, h3 { font-family: 'Cinzel', serif; }
+        h1, h2, h3, .cinzel { font-family: 'Cinzel', serif; }
         .font-mono { font-family: 'Space Mono', monospace; }
         
-        .archive-card {
-            background: linear-gradient(145deg, #1c1917, #0c0a09);
-            border-left: 4px solid #78716c; cursor: pointer; transition: all 0.2s ease;
+        /* App-like Field Groups (Like the screenshots) */
+        .field-group {
+            background-color: #1e222b;
+            border-radius: 0.75rem;
+            border: 1px solid #2d3340;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
         }
-        .archive-card:hover { transform: translateY(-2px); border-left-color: #d6d3d1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
-        
-        .input-field { 
-            width: 100%; background-color: #151312; padding: 0.75rem; 
-            border-radius: 0.25rem; border: 1px solid #44403c; color: #f5f5f4; 
-            font-family: 'Space Mono', monospace; font-size: 0.875rem;
+        .field-row {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #2d3340;
+            display: flex;
+            flex-direction: column;
         }
-        .input-field:focus { outline: none; border-color: #a8a29e; box-shadow: inset 0 0 5px rgba(168, 162, 158, 0.2); }
-        
-        .btn { 
-            padding: 0.6rem 1.2rem; border-radius: 0.25rem; font-weight: bold; 
-            cursor: pointer; text-align: center; text-transform: uppercase; 
-            letter-spacing: 0.05em; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+        .field-row:last-child { border-bottom: none; }
+        .field-row label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        .btn-primary { background-color: #292524; color: #f5f5f4; border: 1px solid #78716c; transition: all 0.2s; }
-        .btn-primary:hover { background-color: #44403c; }
-        .btn-success { background-color: #14532d; color: #bbf7d0; border: 1px solid #166534; transition: all 0.2s; }
-        .btn-success:hover { background-color: #166534; }
-        
-        .tab-btn {
-            padding: 0.75rem 1.5rem; border-bottom: 2px solid transparent; 
-            color: #78716c; font-family: 'Cinzel', serif; font-weight: bold; font-size: 1.1rem;
-            transition: all 0.2s; cursor: pointer;
+        .field-row input, .field-row textarea {
+            background: transparent;
+            color: #f8fafc;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            width: 100%;
         }
-        .tab-btn.active { color: #d6d3d1; border-bottom-color: #d6d3d1; }
-        .tab-btn:hover:not(.active) { color: #a8a29e; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .tab-content.active { display: block; }
+        .field-row textarea { min-height: 80px; resize: vertical; }
+        .field-row input::placeholder, .field-row textarea::placeholder { color: #475569; }
 
+        /* Buttons & Badges */
+        .btn { 
+            padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; 
+            cursor: pointer; transition: all 0.2s; font-size: 0.875rem;
+            display: inline-flex; items-center; justify-content: center;
+        }
+        .btn-primary { background-color: #3b82f6; color: white; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-secondary { background-color: #2d3340; color: #e2e8f0; border: 1px solid #475569; }
+        .btn-secondary:hover { background-color: #334155; }
+        
+        /* Tab Navigation */
+        .tab-scroll { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #2d3340; margin-bottom: 1.5rem; }
+        .tab-btn {
+            padding: 0.5rem 0; border-bottom: 2px solid transparent; 
+            color: #64748b; font-weight: 600; font-size: 0.95rem;
+            white-space: nowrap; transition: all 0.2s; cursor: pointer;
+        }
+        .tab-btn.active { color: #f8fafc; border-bottom-color: #3b82f6; }
+        
+        .tab-content { display: none; animation: fadeIn 0.2s ease-in-out; }
+        .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
         .hidden-view { display: none !important; }
+
+        /* Read View Formatting */
+        .read-section { margin-bottom: 2rem; }
+        .read-section h4 { color: #3b82f6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; font-weight: bold; border-bottom: 1px solid #2d3340; padding-bottom: 0.25rem;}
+        .read-data { margin-bottom: 1rem; }
+        .read-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
+        .read-value { font-size: 1.05rem; color: #f8fafc; white-space: pre-wrap; }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-5xl mx-auto min-h-screen flex flex-col">
+<body class="p-4 md:p-8 max-w-4xl mx-auto min-h-screen flex flex-col">
 
-    <header class="mb-8 border-b border-stone-800 pb-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+    <header class="mb-8 border-b border-[#2d3340] pb-4 flex justify-between items-end">
         <div>
-            <h1 class="text-4xl font-bold text-stone-200 tracking-wider">The Archive</h1>
-            <p class="font-mono text-stone-500 text-sm mt-2"> Script Repository</p>
+            <h1 class="text-3xl font-bold cinzel text-white">The Archive</h1>
+            <p class="text-[#64748b] text-xs font-mono mt-1">Version 3.0 // Granular Databanks</p>
         </div>
-        <div class="mt-4 md:mt-0 flex gap-3">
-            <button onclick="openEditor()" class="btn btn-success">+ Initialize New Record</button>
-            <div class="border-l border-stone-800 pl-3 flex gap-2">
-                <input type="file" id="fileInput" accept=".json" class="hidden"/>
-                <button onclick="document.getElementById('fileInput').click()" class="btn btn-primary text-xs">Import</button>
-                <button onclick="exportData()" class="btn btn-primary text-xs">Backup</button>
-            </div>
+        <div class="flex gap-2">
+            <button onclick="openEditor()" class="btn btn-primary">+ New Script</button>
         </div>
     </header>
 
     <main id="view-dashboard" class="flex-grow">
-        <div class="flex justify-between items-end mb-4 border-b border-stone-800 pb-2">
-            <h2 class="text-2xl font-bold text-stone-300">Indexed Realities</h2>
-            <span class="font-mono text-xs text-stone-500" id="itemCount">0 Records Found</span>
-        </div>
         <div id="itemList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             </div>
     </main>
 
-    <main id="view-editor" class="flex-grow hidden-view bg-stone-900/50 p-6 rounded-lg border border-stone-800 backdrop-blur-sm shadow-2xl">
-        <div class="flex justify-between items-center mb-6 border-b border-stone-700 pb-4">
-            <h2 class="text-2xl font-bold text-stone-200" id="editorTitle">Initialize Record</h2>
-            <div class="space-x-2">
-                <button onclick="closeEditor()" class="btn btn-primary bg-stone-800">Cancel</button>
-                <button onclick="saveRecord()" class="btn btn-success">Save to Archive</button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="md:col-span-2">
-                <label class="font-mono text-xs text-stone-500 mb-1 block">Destination Universe / Title</label>
-                <input type="text" id="inpTitle" placeholder="e.g., Hogwarts Year 4" class="input-field" required>
-            </div>
+    <main id="view-read" class="flex-grow hidden-view bg-[#14171c] p-6 rounded-xl border border-[#2d3340]">
+        <div class="flex justify-between items-start mb-6 pb-4 border-b border-[#2d3340]">
             <div>
-                <label class="font-mono text-xs text-stone-500 mb-1 block">Tags (comma separated)</label>
-                <input type="text" id="inpTags" placeholder="magic, safe..." class="input-field">
+                <button onclick="closeToDashboard()" class="text-[#64748b] hover:text-white text-sm mb-2">← Back to Library</button>
+                <h2 id="read-title" class="text-3xl font-bold text-white cinzel">Script Title</h2>
+                <p id="read-universe" class="text-[#3b82f6] text-sm mt-1">Universe Name</p>
+            </div>
+            <button onclick="editCurrentRead()" class="btn btn-secondary text-xs">Edit Script</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <div class="read-section">
+                    <h4>The Avatar</h4>
+                    <div class="read-data"><div class="read-label">DR Name</div><div id="read-avatar-name" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Age & Details</div><div id="read-avatar-age" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Appearance</div><div id="read-avatar-looks" class="read-value text-sm"></div></div>
+                </div>
+
+                <div class="read-section">
+                    <h4>The Code (Rules)</h4>
+                    <div class="read-data"><div class="read-label">Safeword</div><div id="read-code-safeword" class="read-value text-red-400 font-mono"></div></div>
+                    <div class="read-data"><div class="read-label">Time Ratio</div><div id="read-code-time" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Safety & Conditions</div><div id="read-code-rules" class="read-value text-sm"></div></div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="read-section">
+                    <h4>The Blueprint (World)</h4>
+                    <div class="read-data"><div class="read-label">Starting Location</div><div id="read-world-location" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Current Era / Year</div><div id="read-world-era" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">World Notes & Lore</div><div id="read-world-lore" class="read-value text-sm"></div></div>
+                </div>
+
+                <div class="read-section">
+                    <h4>The Roster</h4>
+                    <div class="read-data"><div class="read-label">Relationships & Connections</div><div id="read-roster-notes" class="read-value text-sm"></div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="view-editor" class="flex-grow hidden-view">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-white" id="editorTitle">Edit Entry</h2>
+            <div class="space-x-2">
+                <button onclick="closeEditor()" class="btn btn-secondary">Cancel</button>
+                <button onclick="saveRecord()" class="btn btn-primary">Save Changes</button>
             </div>
         </div>
 
-        <div class="flex border-b border-stone-700 mb-6 overflow-x-auto">
-            <button onclick="switchTab('tab-blueprint')" id="btn-blueprint" class="tab-btn active">The Blueprint</button>
-            <button onclick="switchTab('tab-avatar')" id="btn-avatar" class="tab-btn">The Avatar</button>
-            <button onclick="switchTab('tab-code')" id="btn-code" class="tab-btn">The Code</button>
-            <button onclick="switchTab('tab-roster')" id="btn-roster" class="tab-btn">The Roster</button>
+        <div class="field-group">
+            <div class="field-row">
+                <label>Script Title (e.g., Hogwarts Year 4)</label>
+                <input type="text" id="inpTitle" placeholder="My Desired Reality...">
+            </div>
+            <div class="field-row">
+                <label>Destination Universe / Fandom</label>
+                <input type="text" id="inpUniverse" placeholder="Harry Potter, MCU, etc...">
+            </div>
         </div>
 
-        <div id="tab-blueprint" class="tab-content active">
-            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Setting, Timeline, Lore & Current Events</label>
-            <textarea id="inpBlueprint" class="input-field min-h-[300px]" placeholder="Describe the world, where you wake up, what year it is..."></textarea>
+        <div class="tab-scroll">
+            <button onclick="switchTab('tab-avatar')" id="btn-avatar" class="tab-btn active">Avatar</button>
+            <button onclick="switchTab('tab-world')" id="btn-world" class="tab-btn">World</button>
+            <button onclick="switchTab('tab-rules')" id="btn-rules" class="tab-btn">Rules</button>
+            <button onclick="switchTab('tab-roster')" id="btn-roster" class="tab-btn">Roster</button>
         </div>
 
-        <div id="tab-avatar" class="tab-content">
-            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Identity, Appearance, Skills & Backstory</label>
-            <textarea id="inpAvatar" class="input-field min-h-[300px]" placeholder="Your name, age, physical traits, magical abilities, personal history..."></textarea>
+        <div id="tab-avatar" class="tab-content active">
+            <div class="field-group">
+                <div class="field-row">
+                    <label>DR Name</label>
+                    <input type="text" id="inpAvatarName" placeholder="First and Last name">
+                </div>
+                <div class="field-row">
+                    <label>Age / Birthday</label>
+                    <input type="text" id="inpAvatarAge" placeholder="16 years old...">
+                </div>
+                <div class="field-row">
+                    <label>Physical Appearance</label>
+                    <textarea id="inpAvatarLooks" placeholder="Eye color, hair, style, exact height..."></textarea>
+                </div>
+            </div>
         </div>
 
-        <div id="tab-code" class="tab-content">
-            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Safewords, Time Ratios & System Rules</label>
-            <textarea id="inpCode" class="input-field min-h-[300px]" placeholder="1 hour in CR = 1 week in DR. Safe word is 'Jumanji'. I am immune to permanent harm..."></textarea>
+        <div id="tab-world" class="tab-content">
+            <div class="field-group">
+                <div class="field-row">
+                    <label>Arrival Location</label>
+                    <input type="text" id="inpWorldLoc" placeholder="Where do you wake up?">
+                </div>
+                <div class="field-row">
+                    <label>Era / Year</label>
+                    <input type="text" id="inpWorldEra" placeholder="e.g., September 1st, 1994">
+                </div>
+                <div class="field-row">
+                    <label>World Rules & Lore</label>
+                    <textarea id="inpWorldLore" placeholder="How does magic work? Any canon divergences?"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-rules" class="tab-content">
+            <div class="field-group">
+                <div class="field-row">
+                    <label>Safeword / Return Action</label>
+                    <input type="text" id="inpRulesSafe" placeholder="e.g., 'Jumanji' or clapping 3 times">
+                </div>
+                <div class="field-row">
+                    <label>Time Ratio</label>
+                    <input type="text" id="inpRulesTime" placeholder="1 hour in CR = 1 week in DR">
+                </div>
+                <div class="field-row">
+                    <label>Safety & Immunities</label>
+                    <textarea id="inpRulesImmune" placeholder="I cannot feel extreme pain. I cannot permanently die..."></textarea>
+                </div>
+            </div>
         </div>
 
         <div id="tab-roster" class="tab-content">
-            <label class="font-mono text-xs text-amber-600/80 mb-2 block">// Relationships, Friends, Foes & Family</label>
-            <textarea id="inpRoster" class="input-field min-h-[300px]" placeholder="List the people in your life and your relationship dynamics with them..."></textarea>
+            <div class="field-group">
+                <div class="field-row">
+                    <label>Relationships</label>
+                    <textarea id="inpRosterNotes" placeholder="List friends, family, enemies, and your relationship dynamics..." style="min-height: 150px;"></textarea>
+                </div>
+            </div>
         </div>
         
-        <div class="mt-6 flex justify-between items-center border-t border-stone-700 pt-4">
-            <button id="btnDelete" onclick="deleteCurrentRecord()" class="text-red-900 hover:text-red-500 font-mono text-xs transition-colors hidden">PURGE RECORD</button>
-            <span class="font-mono text-xs text-stone-600" id="lastEditedText"></span>
+        <div class="mt-4 text-right border-t border-[#2d3340] pt-4">
+            <button id="btnDelete" onclick="deleteCurrentRecord()" class="text-red-500 hover:text-red-400 text-sm hidden">Delete Entire Script</button>
         </div>
     </main>
 
     <script>
         let appData = [];
-        const STORAGE_KEY = 'archive_dr_scripts_v2';
-        let currentEditingId = null;
+        const STORAGE_KEY = 'archive_dr_scripts_v3';
+        let currentViewingId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -143,7 +245,6 @@
                 try { appData = JSON.parse(stored); } 
                 catch(e) { appData = []; }
             }
-            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
             renderDashboard();
         });
 
@@ -152,159 +253,174 @@
             renderDashboard(); 
         }
 
+        // --- VIEW MANAGEMENT ---
+        function showView(viewId) {
+            document.getElementById('view-dashboard').classList.add('hidden-view');
+            document.getElementById('view-read').classList.add('hidden-view');
+            document.getElementById('view-editor').classList.add('hidden-view');
+            document.getElementById(viewId).classList.remove('hidden-view');
+        }
+
+        // --- DASHBOARD ---
         function renderDashboard() {
             const listContainer = document.getElementById('itemList');
-            document.getElementById('itemCount').innerText = `${appData.length} Records Found`;
             listContainer.innerHTML = '';
             
             if (appData.length === 0) {
-                listContainer.innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-10 border border-dashed border-stone-800 rounded"><p class="font-mono text-stone-600 text-sm">The archive is empty. Initialize a new record.</p></div>';
+                listContainer.innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 bg-[#1e222b] rounded-xl text-[#64748b] border border-[#2d3340]">No scripts found. Create your first one above!</div>';
                 return;
             }
 
             appData.forEach(item => {
-                const dateObj = new Date(item.lastEdited || item.dateAdded);
-                
-                let tagsHtml = '';
-                if(item.tags && item.tags.length > 0) {
-                    tagsHtml = `<div class="mt-3 flex flex-wrap gap-2">` + 
-                        item.tags.map(tag => `<span class="bg-stone-800 text-stone-400 border border-stone-700 px-2 py-0.5 rounded-full font-mono text-[10px] lowercase">${tag}</span>`).join('') + 
-                        `</div>`;
-                }
-
                 const div = document.createElement('div');
-                div.className = 'archive-card p-5 rounded border border-stone-800 flex flex-col justify-between';
-                div.onclick = () => openEditor(item.id); // Clicking card opens editor
+                div.className = 'bg-[#1e222b] p-5 rounded-xl border border-[#2d3340] cursor-pointer hover:border-[#3b82f6] transition-colors';
+                div.onclick = () => openReadView(item.id); 
                 div.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-xl text-stone-200 leading-tight">${item.title}</h3>
-                        </div>
-                        <p class="font-mono text-xs text-stone-500 line-clamp-2 mt-2">${item.blueprint || 'No blueprint data...'}</p>
-                        ${tagsHtml}
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-stone-800 flex justify-between items-center">
-                        <span class="font-mono text-[10px] text-stone-600">Last accessed: ${dateObj.toLocaleDateString()}</span>
-                        <span class="font-mono text-xs text-amber-700/80 group-hover:text-amber-500 transition-colors">ACCESS RECORD ></span>
-                    </div>
+                    <h3 class="font-bold text-lg text-white cinzel">${item.title}</h3>
+                    <p class="text-[#3b82f6] text-xs uppercase tracking-wider mb-2">${item.universe || 'Unknown Universe'}</p>
+                    <p class="text-[#94a3b8] text-sm line-clamp-2">${item.world_lore || 'No world lore added yet...'}</p>
                 `;
                 listContainer.appendChild(div);
             });
+            showView('view-dashboard');
         }
 
-        function openEditor(id = null) {
-            currentEditingId = id;
-            const viewDash = document.getElementById('view-dashboard');
-            const viewEdit = document.getElementById('view-editor');
-            const btnDelete = document.getElementById('btnDelete');
-            const lastEditedText = document.getElementById('lastEditedText');
+        // --- READ VIEW ---
+        function openReadView(id) {
+            currentViewingId = id;
+            const script = appData.find(s => s.id === id);
             
-            viewDash.classList.add('hidden-view');
-            viewEdit.classList.remove('hidden-view');
+            document.getElementById('read-title').innerText = script.title || 'Untitled';
+            document.getElementById('read-universe').innerText = script.universe || 'Unspecified Universe';
+            
+            // Populate Read Fields
+            document.getElementById('read-avatar-name').innerText = script.avatar_name || '--';
+            document.getElementById('read-avatar-age').innerText = script.avatar_age || '--';
+            document.getElementById('read-avatar-looks').innerText = script.avatar_looks || '--';
+            
+            document.getElementById('read-code-safeword').innerText = script.rules_safe || '--';
+            document.getElementById('read-code-time').innerText = script.rules_time || '--';
+            document.getElementById('read-code-rules').innerText = script.rules_immune || '--';
 
-            switchTab('tab-blueprint');
+            document.getElementById('read-world-location').innerText = script.world_loc || '--';
+            document.getElementById('read-world-era').innerText = script.world_era || '--';
+            document.getElementById('read-world-lore').innerText = script.world_lore || '--';
 
+            document.getElementById('read-roster-notes').innerText = script.roster_notes || '--';
+
+            showView('view-read');
+        }
+
+        function closeToDashboard() {
+            currentViewingId = null;
+            renderDashboard();
+        }
+
+        // --- EDITOR VIEW ---
+        function openEditor(id = null) {
+            switchTab('tab-avatar'); // Default tab
+            
             if (id) {
+                // Editing existing
                 const script = appData.find(s => s.id === id);
-                document.getElementById('editorTitle').innerText = "Edit Record";
+                document.getElementById('editorTitle').innerText = "Edit Script";
+                document.getElementById('btnDelete').classList.remove('hidden');
+                
+                // Populate Inputs
                 document.getElementById('inpTitle').value = script.title || '';
-                document.getElementById('inpTags').value = (script.tags || []).join(', ');
-                document.getElementById('inpBlueprint').value = script.blueprint || '';
-                document.getElementById('inpAvatar').value = script.avatar || '';
-                document.getElementById('inpCode').value = script.code || '';
-                document.getElementById('inpRoster').value = script.roster || '';
+                document.getElementById('inpUniverse').value = script.universe || '';
                 
-                btnDelete.classList.remove('hidden');
-                const dateStr = new Date(script.lastEdited || script.dateAdded).toLocaleString();
-                lastEditedText.innerText = `Record modified: ${dateStr}`;
+                document.getElementById('inpAvatarName').value = script.avatar_name || '';
+                document.getElementById('inpAvatarAge').value = script.avatar_age || '';
+                document.getElementById('inpAvatarLooks').value = script.avatar_looks || '';
+
+                document.getElementById('inpWorldLoc').value = script.world_loc || '';
+                document.getElementById('inpWorldEra').value = script.world_era || '';
+                document.getElementById('inpWorldLore').value = script.world_lore || '';
+
+                document.getElementById('inpRulesSafe').value = script.rules_safe || '';
+                document.getElementById('inpRulesTime').value = script.rules_time || '';
+                document.getElementById('inpRulesImmune').value = script.rules_immune || '';
+
+                document.getElementById('inpRosterNotes').value = script.roster_notes || '';
             } else {
-                document.getElementById('editorTitle').innerText = "Initialize Record";
-                document.getElementById('inpTitle').value = '';
-                document.getElementById('inpTags').value = '';
-                document.getElementById('inpBlueprint').value = '';
-                document.getElementById('inpAvatar').value = '';
-                document.getElementById('inpCode').value = '';
-                document.getElementById('inpRoster').value = '';
+                // New Script
+                currentViewingId = null;
+                document.getElementById('editorTitle').innerText = "New Script";
+                document.getElementById('btnDelete').classList.add('hidden');
                 
-                btnDelete.classList.add('hidden');
-                lastEditedText.innerText = `New Record Initiation...`;
+                // Clear all inputs
+                document.querySelectorAll('input, textarea').forEach(el => el.value = '');
             }
+            showView('view-editor');
+        }
+
+        function editCurrentRead() {
+            openEditor(currentViewingId);
         }
 
         function closeEditor() {
-            document.getElementById('view-editor').classList.add('hidden-view');
-            document.getElementById('view-dashboard').classList.remove('hidden-view');
-            currentEditingId = null;
+            if (currentViewingId) {
+                openReadView(currentViewingId); // Go back to reading if we were editing
+            } else {
+                renderDashboard(); // Go back to dash if we cancelled a new script
+            }
         }
 
         function saveRecord() {
             const title = document.getElementById('inpTitle').value;
-            if(!title) { alert("Destination Universe/Title is required."); return; }
-
-            const rawTags = document.getElementById('inpTags').value;
-            const tagsArray = rawTags.split(',').map(tag => tag.trim()).filter(tag => tag !== "");
+            if(!title) { alert("Script Title is required."); return; }
 
             const scriptData = {
                 title: title,
-                tags: tagsArray,
-                blueprint: document.getElementById('inpBlueprint').value,
-                avatar: document.getElementById('inpAvatar').value,
-                code: document.getElementById('inpCode').value,
-                roster: document.getElementById('inpRoster').value,
+                universe: document.getElementById('inpUniverse').value,
+                
+                avatar_name: document.getElementById('inpAvatarName').value,
+                avatar_age: document.getElementById('inpAvatarAge').value,
+                avatar_looks: document.getElementById('inpAvatarLooks').value,
+
+                world_loc: document.getElementById('inpWorldLoc').value,
+                world_era: document.getElementById('inpWorldEra').value,
+                world_lore: document.getElementById('inpWorldLore').value,
+
+                rules_safe: document.getElementById('inpRulesSafe').value,
+                rules_time: document.getElementById('inpRulesTime').value,
+                rules_immune: document.getElementById('inpRulesImmune').value,
+
+                roster_notes: document.getElementById('inpRosterNotes').value,
+                
                 lastEdited: new Date().toISOString()
             };
 
-            if (currentEditingId) {
-                const index = appData.findIndex(s => s.id === currentEditingId);
-                if(index !== -1) {
-                    appData[index] = { ...appData[index], ...scriptData };
-                }
+            if (currentViewingId) {
+                // Update existing
+                const index = appData.findIndex(s => s.id === currentViewingId);
+                if(index !== -1) { appData[index] = { ...appData[index], ...scriptData }; }
             } else {
+                // Create new
                 scriptData.id = crypto.randomUUID();
-                scriptData.dateAdded = scriptData.lastEdited;
                 appData.unshift(scriptData);
+                currentViewingId = scriptData.id; // Set id so it opens in read view after save
             }
 
             saveData();
-            closeEditor();
+            openReadView(currentViewingId); // Bring them to the read view of what they just saved
         }
 
         function deleteCurrentRecord() {
-            if(!currentEditingId) return;
-            if(confirm("Classified action: Are you sure you want to permanently erase this record?")) {
-                appData = appData.filter(item => item.id !== currentEditingId);
+            if(confirm("Are you sure you want to delete this script forever?")) {
+                appData = appData.filter(item => item.id !== currentViewingId);
+                currentViewingId = null;
                 saveData();
-                closeEditor();
             }
         }
+
+        // --- TAB LOGIC ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.getElementById(`btn-${tabId.split('-')[1]}`).classList.add('active');
-        }
-        function exportData() { 
-            if (appData.length === 0) { alert("No records to export."); return; }
-            const dataStr = JSON.stringify({ database_version: "2.0", archive_items: appData }, null, 2);
-            const a = document.createElement('a'); 
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(dataStr); 
-            a.download = "The_Archive_Backup_V2.json"; 
-            document.body.appendChild(a); a.click(); a.remove(); 
-        }
-
-        function handleFileUpload(e) { 
-            const file = e.target.files[0]; 
-            if(!file) return; 
-            const reader = new FileReader(); 
-            reader.onload = (ev) => { 
-                try { 
-                    const parsedData = JSON.parse(ev.target.result); 
-                    appData = Array.isArray(parsedData) ? parsedData : (parsedData.archive_items || []); 
-                    saveData(); 
-                    document.getElementById('fileInput').value = ''; 
-                } catch(err) { alert("System Error: Invalid backup file structure."); } 
-            }; 
-            reader.readAsText(file); 
         }
     </script>
 </body>
