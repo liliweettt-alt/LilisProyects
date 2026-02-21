@@ -3,70 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive | Script Repository V3</title>
+    <title>The Archive V4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono&display=swap');
         
         body { 
-            background-color: #0f1115; color: #e2e8f0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0c0a09; color: #d6d3d1; 
+            background-image: radial-gradient(#292524 1px, transparent 1px);
+            background-size: 24px 24px;
         }
         h1, h2, h3, .cinzel { font-family: 'Cinzel', serif; }
         .font-mono { font-family: 'Space Mono', monospace; }
         
-        /* App-like Field Groups (Like the screenshots) */
+        /* App-like Field Groups with Dark Academia colors */
         .field-group {
-            background-color: #1e222b;
-            border-radius: 0.75rem;
-            border: 1px solid #2d3340;
+            background-color: #151312;
+            border-radius: 0.5rem;
+            border: 1px solid #44403c;
             overflow: hidden;
             margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
         .field-row {
             padding: 0.75rem 1rem;
-            border-bottom: 1px solid #2d3340;
+            border-bottom: 1px solid #292524;
             display: flex;
             flex-direction: column;
         }
         .field-row:last-child { border-bottom: none; }
         .field-row label {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-bottom: 0.25rem;
+            font-size: 0.7rem;
+            color: #78716c;
+            margin-bottom: 0.3rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-family: 'Space Mono', monospace;
         }
-        .field-row input, .field-row textarea {
+        .field-row input, .field-row textarea, .field-row select {
             background: transparent;
-            color: #f8fafc;
+            color: #f5f5f4;
             border: none;
             outline: none;
-            font-size: 1rem;
+            font-size: 0.95rem;
             width: 100%;
+            font-family: sans-serif;
         }
-        .field-row textarea { min-height: 80px; resize: vertical; }
-        .field-row input::placeholder, .field-row textarea::placeholder { color: #475569; }
+        .field-row select { color: #a8a29e; cursor: pointer; }
+        .field-row textarea { min-height: 60px; resize: vertical; }
+        .field-row input::placeholder, .field-row textarea::placeholder { color: #57534e; }
 
-        /* Buttons & Badges */
+        /* Buttons */
         .btn { 
-            padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; 
-            cursor: pointer; transition: all 0.2s; font-size: 0.875rem;
-            display: inline-flex; items-center; justify-content: center;
+            padding: 0.6rem 1.2rem; border-radius: 0.25rem; font-weight: bold; 
+            cursor: pointer; text-align: center; text-transform: uppercase; 
+            letter-spacing: 0.05em; font-size: 0.8rem; font-family: 'Space Mono', monospace;
+            transition: all 0.2s;
         }
-        .btn-primary { background-color: #3b82f6; color: white; }
-        .btn-primary:hover { background-color: #2563eb; }
-        .btn-secondary { background-color: #2d3340; color: #e2e8f0; border: 1px solid #475569; }
-        .btn-secondary:hover { background-color: #334155; }
+        .btn-primary { background-color: #292524; color: #f5f5f4; border: 1px solid #78716c; }
+        .btn-primary:hover { background-color: #44403c; }
+        .btn-success { background-color: #14532d; color: #bbf7d0; border: 1px solid #166534; }
+        .btn-success:hover { background-color: #166534; }
+        .btn-danger { background-color: #450a0a; color: #fca5a5; border: 1px solid #991b1b; }
         
         /* Tab Navigation */
-        .tab-scroll { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #2d3340; margin-bottom: 1.5rem; }
+        .tab-scroll { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #292524; margin-bottom: 1.5rem; }
         .tab-btn {
             padding: 0.5rem 0; border-bottom: 2px solid transparent; 
-            color: #64748b; font-weight: 600; font-size: 0.95rem;
+            color: #78716c; font-family: 'Cinzel', serif; font-weight: bold; font-size: 1.1rem;
             white-space: nowrap; transition: all 0.2s; cursor: pointer;
         }
-        .tab-btn.active { color: #f8fafc; border-bottom-color: #3b82f6; }
+        .tab-btn.active { color: #d6d3d1; border-bottom-color: #d6d3d1; }
         
         .tab-content { display: none; animation: fadeIn 0.2s ease-in-out; }
         .tab-content.active { display: block; }
@@ -76,22 +83,22 @@
 
         /* Read View Formatting */
         .read-section { margin-bottom: 2rem; }
-        .read-section h4 { color: #3b82f6; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; font-weight: bold; border-bottom: 1px solid #2d3340; padding-bottom: 0.25rem;}
+        .read-section h4 { color: #a8a29e; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; font-weight: bold; border-bottom: 1px solid #292524; padding-bottom: 0.25rem; font-family: 'Space Mono', monospace;}
         .read-data { margin-bottom: 1rem; }
-        .read-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
-        .read-value { font-size: 1.05rem; color: #f8fafc; white-space: pre-wrap; }
+        .read-label { font-size: 0.7rem; color: #78716c; text-transform: uppercase; font-family: 'Space Mono', monospace;}
+        .read-value { font-size: 1.05rem; color: #f5f5f4; white-space: pre-wrap; font-family: sans-serif;}
+
+        /* Character Card in Read Mode */
+        .char-card { background: #151312; border: 1px solid #44403c; border-left: 3px solid #78716c; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body class="p-4 md:p-8 max-w-4xl mx-auto min-h-screen flex flex-col">
 
-    <header class="mb-8 border-b border-[#2d3340] pb-4 flex justify-between items-end">
+    <header class="mb-8 border-b border-stone-800 pb-4 flex justify-between items-end">
         <div>
-            <h1 class="text-3xl font-bold cinzel text-white">The Archive</h1>
-            <p class="text-[#64748b] text-xs font-mono mt-1">Version 3.0 // Granular Databanks</p>
+            <h1 class="text-3xl font-bold cinzel text-stone-200 tracking-wider">The Archive</h1>
         </div>
-        <div class="flex gap-2">
-            <button onclick="openEditor()" class="btn btn-primary">+ New Script</button>
-        </div>
+        <button onclick="openEditor()" class="btn btn-success">+ Initialize</button>
     </header>
 
     <main id="view-dashboard" class="flex-grow">
@@ -99,44 +106,47 @@
             </div>
     </main>
 
-    <main id="view-read" class="flex-grow hidden-view bg-[#14171c] p-6 rounded-xl border border-[#2d3340]">
-        <div class="flex justify-between items-start mb-6 pb-4 border-b border-[#2d3340]">
+    <main id="view-read" class="flex-grow hidden-view bg-stone-900/50 p-6 rounded-xl border border-stone-800 backdrop-blur-sm shadow-2xl">
+        <div class="flex justify-between items-start mb-6 pb-4 border-b border-stone-800">
             <div>
-                <button onclick="closeToDashboard()" class="text-[#64748b] hover:text-white text-sm mb-2">← Back to Library</button>
-                <h2 id="read-title" class="text-3xl font-bold text-white cinzel">Script Title</h2>
-                <p id="read-universe" class="text-[#3b82f6] text-sm mt-1">Universe Name</p>
+                <button onclick="closeToDashboard()" class="text-stone-500 hover:text-stone-300 font-mono text-xs mb-3 transition-colors">← RETURN TO INDEX</button>
+                <h2 id="read-title" class="text-3xl font-bold text-stone-200 cinzel">Script Title</h2>
+                <p id="read-universe" class="text-amber-700 font-mono text-sm mt-1 uppercase">Universe Name</p>
             </div>
-            <button onclick="editCurrentRead()" class="btn btn-secondary text-xs">Edit Script</button>
+            <button onclick="editCurrentRead()" class="btn btn-primary text-xs">Modify Record</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
                 <div class="read-section">
                     <h4>The Avatar</h4>
-                    <div class="read-data"><div class="read-label">DR Name</div><div id="read-avatar-name" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Age & Details</div><div id="read-avatar-age" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Appearance</div><div id="read-avatar-looks" class="read-value text-sm"></div></div>
+                    <div class="read-data"><div class="read-label">Full Name & Aliases</div><div id="read-avatar-name" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Age & Demographics</div><div id="read-avatar-age" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Physical Appearance</div><div id="read-avatar-looks" class="read-value text-sm text-stone-300"></div></div>
+                    <div class="read-data"><div class="read-label">Personality & Skills</div><div id="read-avatar-skills" class="read-value text-sm text-stone-300"></div></div>
                 </div>
 
                 <div class="read-section">
-                    <h4>The Code (Rules)</h4>
-                    <div class="read-data"><div class="read-label">Safeword</div><div id="read-code-safeword" class="read-value text-red-400 font-mono"></div></div>
+                    <h4>System Codes & Rules</h4>
+                    <div class="read-data"><div class="read-label">Return / Leave Codes</div><div id="read-code-safe" class="read-value text-red-900 font-mono font-bold"></div></div>
                     <div class="read-data"><div class="read-label">Time Ratio</div><div id="read-code-time" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Safety & Conditions</div><div id="read-code-rules" class="read-value text-sm"></div></div>
+                    <div class="read-data"><div class="read-label">Immunities & Conditions</div><div id="read-code-rules" class="read-value text-sm text-stone-300"></div></div>
+                    <div class="read-data"><div class="read-label">Scripted Events</div><div id="read-code-events" class="read-value text-sm text-stone-300"></div></div>
                 </div>
             </div>
             
             <div>
                 <div class="read-section">
-                    <h4>The Blueprint (World)</h4>
-                    <div class="read-data"><div class="read-label">Starting Location</div><div id="read-world-location" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Current Era / Year</div><div id="read-world-era" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">World Notes & Lore</div><div id="read-world-lore" class="read-value text-sm"></div></div>
+                    <h4>The Blueprint</h4>
+                    <div class="read-data"><div class="read-label">Arrival Location</div><div id="read-world-location" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">Era / Timeline</div><div id="read-world-era" class="read-value"></div></div>
+                    <div class="read-data"><div class="read-label">World Lore & Rules</div><div id="read-world-lore" class="read-value text-sm text-stone-300"></div></div>
                 </div>
 
                 <div class="read-section">
                     <h4>The Roster</h4>
-                    <div class="read-data"><div class="read-label">Relationships & Connections</div><div id="read-roster-notes" class="read-value text-sm"></div></div>
+                    <div id="read-roster-list">
+                        </div>
                 </div>
             </div>
         </div>
@@ -144,44 +154,48 @@
 
     <main id="view-editor" class="flex-grow hidden-view">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-white" id="editorTitle">Edit Entry</h2>
+            <h2 class="text-2xl font-bold text-stone-200 cinzel" id="editorTitle">Initialize Entry</h2>
             <div class="space-x-2">
-                <button onclick="closeEditor()" class="btn btn-secondary">Cancel</button>
-                <button onclick="saveRecord()" class="btn btn-primary">Save Changes</button>
+                <button onclick="closeEditor()" class="btn btn-primary bg-transparent">Cancel</button>
+                <button onclick="saveRecord()" class="btn btn-success">Commit Changes</button>
             </div>
         </div>
 
         <div class="field-group">
             <div class="field-row">
-                <label>Script Title (e.g., Hogwarts Year 4)</label>
-                <input type="text" id="inpTitle" placeholder="My Desired Reality...">
+                <label>Designation / Script Title</label>
+                <input type="text" id="inpTitle" placeholder="e.g., Hogwarts Year 4">
             </div>
             <div class="field-row">
-                <label>Destination Universe / Fandom</label>
-                <input type="text" id="inpUniverse" placeholder="Harry Potter, MCU, etc...">
+                <label>Destination Universe</label>
+                <input type="text" id="inpUniverse" placeholder="e.g., Wizarding World">
             </div>
         </div>
 
         <div class="tab-scroll">
-            <button onclick="switchTab('tab-avatar')" id="btn-avatar" class="tab-btn active">Avatar</button>
-            <button onclick="switchTab('tab-world')" id="btn-world" class="tab-btn">World</button>
-            <button onclick="switchTab('tab-rules')" id="btn-rules" class="tab-btn">Rules</button>
-            <button onclick="switchTab('tab-roster')" id="btn-roster" class="tab-btn">Roster</button>
+            <button onclick="switchTab('tab-avatar')" id="btn-avatar" class="tab-btn active">The Avatar</button>
+            <button onclick="switchTab('tab-world')" id="btn-world" class="tab-btn">The Blueprint</button>
+            <button onclick="switchTab('tab-rules')" id="btn-rules" class="tab-btn">The Code</button>
+            <button onclick="switchTab('tab-roster')" id="btn-roster" class="tab-btn">The Roster</button>
         </div>
 
         <div id="tab-avatar" class="tab-content active">
             <div class="field-group">
                 <div class="field-row">
-                    <label>DR Name</label>
-                    <input type="text" id="inpAvatarName" placeholder="First and Last name">
+                    <label>Full Name & Aliases</label>
+                    <input type="text" id="inpAvatarName" placeholder="Your name in this reality...">
                 </div>
                 <div class="field-row">
-                    <label>Age / Birthday</label>
-                    <input type="text" id="inpAvatarAge" placeholder="16 years old...">
+                    <label>Age, Gender & Background</label>
+                    <input type="text" id="inpAvatarAge" placeholder="e.g., 16 years old, Female, English...">
                 </div>
                 <div class="field-row">
                     <label>Physical Appearance</label>
-                    <textarea id="inpAvatarLooks" placeholder="Eye color, hair, style, exact height..."></textarea>
+                    <textarea id="inpAvatarLooks" placeholder="Height, weight, eyes, skin, clothing style..."></textarea>
+                </div>
+                <div class="field-row">
+                    <label>Personality, Skills & Extras</label>
+                    <textarea id="inpAvatarSkills" placeholder="Traits, languages spoken, special items (wands, pets)..."></textarea>
                 </div>
             </div>
         </div>
@@ -190,15 +204,15 @@
             <div class="field-group">
                 <div class="field-row">
                     <label>Arrival Location</label>
-                    <input type="text" id="inpWorldLoc" placeholder="Where do you wake up?">
+                    <input type="text" id="inpWorldLoc" placeholder="Where exactly do you wake up?">
                 </div>
                 <div class="field-row">
-                    <label>Era / Year</label>
-                    <input type="text" id="inpWorldEra" placeholder="e.g., September 1st, 1994">
+                    <label>Era / Timestamp</label>
+                    <input type="text" id="inpWorldEra" placeholder="e.g., September 1st, 1991">
                 </div>
                 <div class="field-row">
-                    <label>World Rules & Lore</label>
-                    <textarea id="inpWorldLore" placeholder="How does magic work? Any canon divergences?"></textarea>
+                    <label>World Lore & Mechanics</label>
+                    <textarea id="inpWorldLore" placeholder="How does the world work? Money status? Differences from canon?"></textarea>
                 </div>
             </div>
         </div>
@@ -206,38 +220,42 @@
         <div id="tab-rules" class="tab-content">
             <div class="field-group">
                 <div class="field-row">
-                    <label>Safeword / Return Action</label>
-                    <input type="text" id="inpRulesSafe" placeholder="e.g., 'Jumanji' or clapping 3 times">
+                    <label>Return & Leave Codes</label>
+                    <input type="text" id="inpRulesSafe" placeholder="e.g., Safe word: Turinza. Leave word: Viturio.">
                 </div>
                 <div class="field-row">
                     <label>Time Ratio</label>
-                    <input type="text" id="inpRulesTime" placeholder="1 hour in CR = 1 week in DR">
+                    <input type="text" id="inpRulesTime" placeholder="e.g., 8 hours in CR = 4 years in DR">
                 </div>
                 <div class="field-row">
-                    <label>Safety & Immunities</label>
-                    <textarea id="inpRulesImmune" placeholder="I cannot feel extreme pain. I cannot permanently die..."></textarea>
+                    <label>Immunities & System Rules</label>
+                    <textarea id="inpRulesImmune" placeholder="High pain tolerance, cannot die, always wake up rested..."></textarea>
+                </div>
+                <div class="field-row">
+                    <label>Scripted Events</label>
+                    <textarea id="inpRulesEvents" placeholder="Events that MUST happen (e.g., Sorted into Gryffindor, befriending trio...)"></textarea>
                 </div>
             </div>
         </div>
 
         <div id="tab-roster" class="tab-content">
-            <div class="field-group">
-                <div class="field-row">
-                    <label>Relationships</label>
-                    <textarea id="inpRosterNotes" placeholder="List friends, family, enemies, and your relationship dynamics..." style="min-height: 150px;"></textarea>
+            <div id="roster-editor-container">
                 </div>
-            </div>
+            <button onclick="addCharacterForm()" class="btn btn-primary w-full border-dashed text-stone-400 mt-2 hover:text-stone-200">+ Add Character Profile</button>
         </div>
         
-        <div class="mt-4 text-right border-t border-[#2d3340] pt-4">
-            <button id="btnDelete" onclick="deleteCurrentRecord()" class="text-red-500 hover:text-red-400 text-sm hidden">Delete Entire Script</button>
+        <div class="mt-8 text-right border-t border-stone-800 pt-4">
+            <button id="btnDelete" onclick="deleteCurrentRecord()" class="btn btn-danger hidden">Purge Record</button>
         </div>
     </main>
 
     <script>
         let appData = [];
-        const STORAGE_KEY = 'archive_dr_scripts_v3';
+        const STORAGE_KEY = 'archive_dr_scripts_v4';
         let currentViewingId = null;
+        
+        // Temporary array to hold characters while editing a script
+        let editingRoster = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem(STORAGE_KEY);
@@ -267,18 +285,18 @@
             listContainer.innerHTML = '';
             
             if (appData.length === 0) {
-                listContainer.innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 bg-[#1e222b] rounded-xl text-[#64748b] border border-[#2d3340]">No scripts found. Create your first one above!</div>';
+                listContainer.innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 bg-[#151312] rounded-xl text-stone-500 border border-stone-800 font-mono text-sm">No classified records found. Initialize above.</div>';
                 return;
             }
 
             appData.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'bg-[#1e222b] p-5 rounded-xl border border-[#2d3340] cursor-pointer hover:border-[#3b82f6] transition-colors';
+                div.className = 'bg-[#151312] p-5 rounded border-l-4 border-stone-600 border-y border-r border-y-stone-800 border-r-stone-800 cursor-pointer hover:border-l-stone-300 transition-all';
                 div.onclick = () => openReadView(item.id); 
                 div.innerHTML = `
-                    <h3 class="font-bold text-lg text-white cinzel">${item.title}</h3>
-                    <p class="text-[#3b82f6] text-xs uppercase tracking-wider mb-2">${item.universe || 'Unknown Universe'}</p>
-                    <p class="text-[#94a3b8] text-sm line-clamp-2">${item.world_lore || 'No world lore added yet...'}</p>
+                    <h3 class="font-bold text-lg text-stone-200 cinzel">${item.title}</h3>
+                    <p class="text-amber-700/80 text-xs font-mono uppercase tracking-wider mb-2">${item.universe || 'Unknown Universe'}</p>
+                    <p class="text-stone-500 text-sm line-clamp-2">${item.world_lore || 'No world lore added yet...'}</p>
                 `;
                 listContainer.appendChild(div);
             });
@@ -293,20 +311,38 @@
             document.getElementById('read-title').innerText = script.title || 'Untitled';
             document.getElementById('read-universe').innerText = script.universe || 'Unspecified Universe';
             
-            // Populate Read Fields
             document.getElementById('read-avatar-name').innerText = script.avatar_name || '--';
             document.getElementById('read-avatar-age').innerText = script.avatar_age || '--';
             document.getElementById('read-avatar-looks').innerText = script.avatar_looks || '--';
+            document.getElementById('read-avatar-skills').innerText = script.avatar_skills || '--';
             
-            document.getElementById('read-code-safeword').innerText = script.rules_safe || '--';
+            document.getElementById('read-code-safe').innerText = script.rules_safe || '--';
             document.getElementById('read-code-time').innerText = script.rules_time || '--';
             document.getElementById('read-code-rules').innerText = script.rules_immune || '--';
+            document.getElementById('read-code-events').innerText = script.rules_events || '--';
 
             document.getElementById('read-world-location').innerText = script.world_loc || '--';
             document.getElementById('read-world-era').innerText = script.world_era || '--';
             document.getElementById('read-world-lore').innerText = script.world_lore || '--';
 
-            document.getElementById('read-roster-notes').innerText = script.roster_notes || '--';
+            // Render Character Cards
+            const rosterContainer = document.getElementById('read-roster-list');
+            rosterContainer.innerHTML = '';
+            if(script.roster && script.roster.length > 0) {
+                script.roster.forEach(char => {
+                    rosterContainer.innerHTML += `
+                        <div class="char-card">
+                            <div class="flex justify-between items-baseline mb-1">
+                                <h5 class="font-bold text-stone-200 font-sans">${char.name}</h5>
+                                <span class="text-[10px] font-mono uppercase text-amber-600 border border-amber-900/50 px-1 rounded bg-amber-900/10">${char.role}</span>
+                            </div>
+                            <p class="text-sm text-stone-400 font-sans">${char.details}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                rosterContainer.innerHTML = '<p class="text-sm text-stone-600 font-mono">No characters indexed.</p>';
+            }
 
             showView('view-read');
         }
@@ -316,23 +352,24 @@
             renderDashboard();
         }
 
-        // --- EDITOR VIEW ---
+        // --- EDITOR VIEW & ROSTER LOGIC ---
         function openEditor(id = null) {
-            switchTab('tab-avatar'); // Default tab
+            switchTab('tab-avatar'); 
+            const rosterContainer = document.getElementById('roster-editor-container');
+            rosterContainer.innerHTML = '';
             
             if (id) {
-                // Editing existing
                 const script = appData.find(s => s.id === id);
-                document.getElementById('editorTitle').innerText = "Edit Script";
+                document.getElementById('editorTitle').innerText = "Modify Record";
                 document.getElementById('btnDelete').classList.remove('hidden');
                 
-                // Populate Inputs
                 document.getElementById('inpTitle').value = script.title || '';
                 document.getElementById('inpUniverse').value = script.universe || '';
                 
                 document.getElementById('inpAvatarName').value = script.avatar_name || '';
                 document.getElementById('inpAvatarAge').value = script.avatar_age || '';
                 document.getElementById('inpAvatarLooks').value = script.avatar_looks || '';
+                document.getElementById('inpAvatarSkills').value = script.avatar_skills || '';
 
                 document.getElementById('inpWorldLoc').value = script.world_loc || '';
                 document.getElementById('inpWorldEra').value = script.world_era || '';
@@ -341,35 +378,79 @@
                 document.getElementById('inpRulesSafe').value = script.rules_safe || '';
                 document.getElementById('inpRulesTime').value = script.rules_time || '';
                 document.getElementById('inpRulesImmune').value = script.rules_immune || '';
+                document.getElementById('inpRulesEvents').value = script.rules_events || '';
 
-                document.getElementById('inpRosterNotes').value = script.roster_notes || '';
+                // Load Characters into editor
+                editingRoster = JSON.parse(JSON.stringify(script.roster || []));
+                editingRoster.forEach(char => renderCharacterForm(char.id, char.name, char.role, char.details));
+
             } else {
-                // New Script
                 currentViewingId = null;
-                document.getElementById('editorTitle').innerText = "New Script";
+                document.getElementById('editorTitle').innerText = "Initialize Record";
                 document.getElementById('btnDelete').classList.add('hidden');
-                
-                // Clear all inputs
                 document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+                editingRoster = [];
             }
             showView('view-editor');
         }
 
-        function editCurrentRead() {
-            openEditor(currentViewingId);
-        }
+        function editCurrentRead() { openEditor(currentViewingId); }
 
         function closeEditor() {
-            if (currentViewingId) {
-                openReadView(currentViewingId); // Go back to reading if we were editing
-            } else {
-                renderDashboard(); // Go back to dash if we cancelled a new script
-            }
+            if (currentViewingId) openReadView(currentViewingId); 
+            else renderDashboard(); 
         }
 
+        // -- DYNAMIC CHARACTER FORMS --
+        function addCharacterForm() {
+            const charId = crypto.randomUUID();
+            editingRoster.push({ id: charId, name: '', role: 'Friend', details: '' });
+            renderCharacterForm(charId, '', 'Friend', '');
+        }
+
+        function renderCharacterForm(id, name, role, details) {
+            const container = document.getElementById('roster-editor-container');
+            const charDiv = document.createElement('div');
+            charDiv.className = 'field-group relative';
+            charDiv.id = `char-${id}`;
+            charDiv.innerHTML = `
+                <button onclick="removeCharacter('${id}')" class="absolute top-2 right-2 text-stone-600 hover:text-red-500 font-mono text-xs">✕</button>
+                <div class="field-row">
+                    <label>Character Name</label>
+                    <input type="text" placeholder="e.g., Hermione Granger" value="${name}" onchange="updateChar('${id}', 'name', this.value)">
+                </div>
+                <div class="field-row">
+                    <label>Role / Category</label>
+                    <select onchange="updateChar('${id}', 'role', this.value)">
+                        <option value="Friend" ${role === 'Friend' ? 'selected' : ''}>Friend / Ally</option>
+                        <option value="Family" ${role === 'Family' ? 'selected' : ''}>Family</option>
+                        <option value="Romantic" ${role === 'Romantic' ? 'selected' : ''}>Romantic Interest</option>
+                        <option value="Enemy" ${role === 'Enemy' ? 'selected' : ''}>Enemy / Rival</option>
+                        <option value="Other" ${role === 'Other' ? 'selected' : ''}>Other</option>
+                    </select>
+                </div>
+                <div class="field-row">
+                    <label>Relationship Dynamics & Details</label>
+                    <textarea placeholder="Describe how you interact, history, feelings..." onchange="updateChar('${id}', 'details', this.value)">${details}</textarea>
+                </div>
+            `;
+            container.appendChild(charDiv);
+        }
+
+        function updateChar(id, field, value) {
+            const char = editingRoster.find(c => c.id === id);
+            if(char) char[field] = value;
+        }
+
+        function removeCharacter(id) {
+            editingRoster = editingRoster.filter(c => c.id !== id);
+            document.getElementById(`char-${id}`).remove();
+        }
+
+        // --- SAVE LOGIC ---
         function saveRecord() {
             const title = document.getElementById('inpTitle').value;
-            if(!title) { alert("Script Title is required."); return; }
+            if(!title) { alert("Designation / Title is required."); return; }
 
             const scriptData = {
                 title: title,
@@ -378,6 +459,7 @@
                 avatar_name: document.getElementById('inpAvatarName').value,
                 avatar_age: document.getElementById('inpAvatarAge').value,
                 avatar_looks: document.getElementById('inpAvatarLooks').value,
+                avatar_skills: document.getElementById('inpAvatarSkills').value,
 
                 world_loc: document.getElementById('inpWorldLoc').value,
                 world_era: document.getElementById('inpWorldEra').value,
@@ -386,29 +468,28 @@
                 rules_safe: document.getElementById('inpRulesSafe').value,
                 rules_time: document.getElementById('inpRulesTime').value,
                 rules_immune: document.getElementById('inpRulesImmune').value,
+                rules_events: document.getElementById('inpRulesEvents').value,
 
-                roster_notes: document.getElementById('inpRosterNotes').value,
+                roster: editingRoster, // Save the dynamic array
                 
                 lastEdited: new Date().toISOString()
             };
 
             if (currentViewingId) {
-                // Update existing
                 const index = appData.findIndex(s => s.id === currentViewingId);
                 if(index !== -1) { appData[index] = { ...appData[index], ...scriptData }; }
             } else {
-                // Create new
                 scriptData.id = crypto.randomUUID();
                 appData.unshift(scriptData);
-                currentViewingId = scriptData.id; // Set id so it opens in read view after save
+                currentViewingId = scriptData.id; 
             }
 
             saveData();
-            openReadView(currentViewingId); // Bring them to the read view of what they just saved
+            openReadView(currentViewingId); 
         }
 
         function deleteCurrentRecord() {
-            if(confirm("Are you sure you want to delete this script forever?")) {
+            if(confirm("Classified action: Delete this script forever?")) {
                 appData = appData.filter(item => item.id !== currentViewingId);
                 currentViewingId = null;
                 saveData();
