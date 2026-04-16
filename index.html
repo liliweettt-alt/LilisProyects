@@ -1,227 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Log & Character Viewer</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e5ddd5;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .header {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-        }
-        input[type="file"] {
-            margin-top: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background: #f9f9f9;
-        }
-        .chat-container {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .message {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-            word-wrap: break-word;
-        }
-        .user-message {
-            align-self: flex-end;
-            background-color: #dcf8c6;
-            border-bottom-right-radius: 0;
-        }
-        .ai-message {
-            align-self: flex-start;
-            background-color: #ffffff;
-            border-bottom-left-radius: 0;
-        }
-        .message-header {
-            font-size: 0.8em;
-            color: #888;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        .message-body {
-            font-size: 1em;
-            line-height: 1.5;
-            color: #333;
-        }
-        .message-body em {
-            color: #555;
-        }
-        .character-card {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 800px;
-            line-height: 1.6;
-        }
-        .character-card h2 { 
-            margin-top: 0; 
-            color: #222;
-            border-bottom: 2px solid #e5ddd5;
-            padding-bottom: 10px;
-        }
-        .conversation-divider {
-            text-align: center;
-            color: #666;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin: 25px 0 10px 0;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 20px;
-            align-self: center;
-            width: 80%;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Archive - Conversation Reader</title>
+<style>
+  :root {
+    --bg-color: #1e1b18; 
+    --sidebar-bg: #27231f;
+    --chat-bg: #24211d;
+    --text-primary: #d4c8b8;
+    --text-secondary: #a89f91;
+    --accent: #8b6d4b;
+    --msg-user: #43362a;
+    --msg-ai: #2d2925;
+    --border: #3d3630;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Georgia', serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar Styling */
+  #sidebar {
+    width: 320px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header-area {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h1 {
+    font-size: 1.3rem;
+    margin: 0 0 15px 0;
+    color: var(--accent);
+    font-weight: normal;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  input[type="file"] {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    width: 100%;
+    cursor: pointer;
+  }
+
+  #contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  #contact-list li {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 1.1rem;
+  }
+
+  #contact-list li:hover, #contact-list li.active {
+    background-color: var(--msg-user);
+    color: #fff;
+  }
+
+  /* Chat Area Styling */
+  #chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--chat-bg);
+  }
+
+  #chat-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.4rem;
+    color: var(--accent);
+    background-color: var(--sidebar-bg);
+  }
+
+  #messages {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .msg {
+    max-width: 65%;
+    padding: 14px 18px;
+    border-radius: 8px;
+    line-height: 1.6;
+    font-size: 1.05rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .msg i {
+    color: var(--text-secondary);
+  }
+
+  .msg-user {
+    align-self: flex-end;
+    background-color: var(--msg-user);
+    border-bottom-right-radius: 0;
+  }
+
+  .msg-ai {
+    align-self: flex-start;
+    background-color: var(--msg-ai);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 0;
+  }
+
+  .time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    text-align: right;
+    display: block;
+  }
+
+  /* Scrollbar Customization */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-color); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Character.AI Export Viewer</h1>
-        <p>Select your <code>message.json</code> or <code>character.json</code> file below to format it into a readable interface.</p>
-        <input type="file" id="fileInput" accept=".json">
-    </div>
+<div id="sidebar">
+  <div class="header-area">
+    <h1>The Archive</h1>
+    <input type="file" id="file-input" accept=".json" />
+  </div>
+  <ul id="contact-list"></ul>
+</div>
 
-    <div id="output" class="chat-container"></div>
+<div id="chat-area">
+  <div id="chat-header">Select a file to begin</div>
+  <div id="messages"></div>
+</div>
 
-    <script>
-        document.getElementById('fileInput').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+<script>
+  let conversations = {};
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    renderData(data, file.name);
-                } catch (err) {
-                    alert("Error reading JSON file. Make sure it's a valid JSON format.\n\nDetails: " + err.message);
-                }
-            };
-            reader.readAsText(file);
-        });
+  // Listen for the user uploading the JSON file
+  document.getElementById('file-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
 
-        function renderData(data, fileName) {
-            const container = document.getElementById('output');
-            container.innerHTML = ''; // Clear previous outputs
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        processData(data);
+      } catch (err) {
+        alert("Error reading JSON file. Make sure it is formatted correctly.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  });
 
-            const items = Array.isArray(data) ? data : [data];
-            const isCharacterFile = fileName.toLowerCase().includes('character');
+  function processData(data) {
+    // 1. Normalize the properties since the AI and User objects use different keys
+    let mapped = data.map(item => {
+      const isUser = item.src !== undefined; 
+      const text = isUser ? item.text : item.raw_content;
+      const timeStr = isUser ? item.created : item.create_time;
+      const tgt = item.tgt || null;
+      
+      return {
+        isUser,
+        text,
+        time: new Date(timeStr),
+        tgt
+      };
+    }).filter(m => m.text); // Filter out any empty/broken data
 
-            if (isCharacterFile) {
-                // Render characters as cards
-                items.forEach(item => {
-                    if (item.name || item.title) {
-                        renderCharacter(item, container);
-                    }
-                });
-            } else {
-                // Parse and standardize messages
-                const parsedMessages = [];
+    // 2. Sort chronologically
+    mapped.sort((a, b) => a.time - b.time);
 
-                items.forEach(msg => {
-                    let text = msg.text || msg.raw_content || msg.content;
-                    if (!text) return; 
+    conversations = {};
+    let currentCharacter = "Unknown AI";
 
-                    let isUser = !!msg.src;
-                    let sender = msg.src || (msg.candidate_id ? "AI" : "User");
-                    if (msg.tgt && isUser) {
-                        sender = `${msg.src} \u2192 ${msg.tgt}`;
-                    }
+    // 3. Group into individual character conversations based on timeline
+    mapped.forEach(m => {
+      if (m.isUser && m.tgt) {
+        currentCharacter = m.tgt;
+      }
+      
+      if (!conversations[currentCharacter]) {
+        conversations[currentCharacter] = [];
+      }
+      conversations[currentCharacter].push(m);
+    });
 
-                    // Grab timestamp (handles both user 'created' and AI 'create_time')
-                    let rawTime = msg.created || msg.create_time;
-                    let timestamp = rawTime ? new Date(rawTime) : new Date(0);
+    renderContacts();
+  }
 
-                    parsedMessages.push({ text, isUser, sender, timestamp });
-                });
+  // Parses markdown-like asterisks into italicized actions for better reading
+  function formatText(text) {
+    const div = document.createElement('div');
+    div.innerText = text; // Safe escape
+    let escaped = div.innerHTML;
+    
+    escaped = escaped.replace(/\*([^*]+)\*/g, '<i>*$1*</i>');
+    return escaped.replace(/\n/g, '<br>');
+  }
 
-                // Sort everything chronologically!
-                parsedMessages.sort((a, b) => a.timestamp - b.timestamp);
+  function renderContacts() {
+    const list = document.getElementById('contact-list');
+    list.innerHTML = '';
+    
+    Object.keys(conversations).forEach(char => {
+      const li = document.createElement('li');
+      li.textContent = char;
+      li.onclick = () => {
+        // Highlight active contact
+        document.querySelectorAll('#contact-list li').forEach(el => el.classList.remove('active'));
+        li.classList.add('active');
+        renderMessages(char);
+      };
+      list.appendChild(li);
+    });
 
-                // Render with conversation dividers
-                let lastTime = null;
-                const FOUR_HOURS_IN_MS = 4 * 60 * 60 * 1000;
+    // Auto-load the first conversation if available
+    if (Object.keys(conversations).length > 0) {
+      list.firstChild.click();
+    }
+  }
 
-                parsedMessages.forEach(msg => {
-                    // If gap between messages is > 4 hours, start a new session visually
-                    if (lastTime && (msg.timestamp - lastTime > FOUR_HOURS_IN_MS)) {
-                        const divider = document.createElement('div');
-                        divider.classList.add('conversation-divider');
-                        divider.innerText = "New Conversation Session";
-                        container.appendChild(divider);
-                    }
-                    lastTime = msg.timestamp;
+  function renderMessages(char) {
+    document.getElementById('chat-header').textContent = char;
+    const msgContainer = document.getElementById('messages');
+    msgContainer.innerHTML = '';
 
-                    renderMessage(msg, container);
-                });
-            }
-        }
+    conversations[char].forEach(m => {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'msg ' + (m.isUser ? 'msg-user' : 'msg-ai');
+      
+      const timeStr = m.time.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+      
+      msgDiv.innerHTML = formatText(m.text) + `<span class="time">${timeStr}</span>`;
+      msgContainer.appendChild(msgDiv);
+    });
+    
+    // Auto-scroll to bottom of the chat
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+</script>
 
-        function renderCharacter(char, container) {
-            const card = document.createElement('div');
-            card.classList.add('character-card');
-
-            const title = char.name || char.title || "Unknown Character";
-            const formatText = (text) => text ? text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') : 'N/A';
-
-            const greeting = char.greeting ? `<p><strong>Greeting:</strong><br>${formatText(char.greeting)}</p>` : '';
-            const description = char.description ? `<p><strong>Description:</strong><br>${formatText(char.description)}</p>` : '';
-            const definition = char.definition ? `<p><strong>Definition:</strong><br>${formatText(char.definition)}</p>` : '';
-
-            card.innerHTML = `<h2>${title}</h2>${greeting}${description}${definition}`;
-            container.appendChild(card);
-        }
-
-        function renderMessage(msg, container) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.classList.add(msg.isUser ? 'user-message' : 'ai-message');
-
-            const headerDiv = document.createElement('div');
-            headerDiv.classList.add('message-header');
-            
-            let timeStr = msg.timestamp.getTime() > 0 ? msg.timestamp.toLocaleString() : "";
-            headerDiv.innerText = `${msg.sender} ${timeStr ? ' \u2022 ' + timeStr : ''}`;
-
-            const bodyDiv = document.createElement('div');
-            bodyDiv.classList.add('message-body');
-            
-            let formattedText = msg.text.replace(/\\n/g, '\n').replace(/\n/g, '<br>');
-            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>*$1*</em>');
-            bodyDiv.innerHTML = formattedText;
-
-            messageDiv.appendChild(headerDiv);
-            messageDiv.appendChild(bodyDiv);
-            container.appendChild(messageDiv);
-        }
-    </script>
 </body>
 </html>
