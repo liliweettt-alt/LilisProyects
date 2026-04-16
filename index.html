@@ -3,505 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive V4</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Chat Log & Character Viewer</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono&display=swap');
-        
-        body { 
-            background-color: #0c0a09; color: #d6d3d1; 
-            background-image: radial-gradient(#292524 1px, transparent 1px);
-            background-size: 24px 24px;
-        }
-        h1, h2, h3, .cinzel { font-family: 'Cinzel', serif; }
-        .font-mono { font-family: 'Space Mono', monospace; }
-        
-        /* App-like Field Groups with Dark Academia colors */
-        .field-group {
-            background-color: #151312;
-            border-radius: 0.5rem;
-            border: 1px solid #44403c;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-        }
-        .field-row {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #292524;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e5ddd5;
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
-        .field-row:last-child { border-bottom: none; }
-        .field-row label {
-            font-size: 0.7rem;
-            color: #78716c;
-            margin-bottom: 0.3rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: 'Space Mono', monospace;
-        }
-        .field-row input, .field-row textarea, .field-row select {
-            background: transparent;
-            color: #f5f5f4;
-            border: none;
-            outline: none;
-            font-size: 0.95rem;
+        .header {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
             width: 100%;
-            font-family: sans-serif;
+            max-width: 800px;
+            text-align: center;
         }
-        .field-row select { color: #a8a29e; cursor: pointer; }
-        .field-row textarea { min-height: 60px; resize: vertical; }
-        .field-row input::placeholder, .field-row textarea::placeholder { color: #57534e; }
-
-        /* Buttons */
-        .btn { 
-            padding: 0.6rem 1.2rem; border-radius: 0.25rem; font-weight: bold; 
-            cursor: pointer; text-align: center; text-transform: uppercase; 
-            letter-spacing: 0.05em; font-size: 0.8rem; font-family: 'Space Mono', monospace;
-            transition: all 0.2s;
+        input[type="file"] {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #f9f9f9;
         }
-        .btn-primary { background-color: #292524; color: #f5f5f4; border: 1px solid #78716c; }
-        .btn-primary:hover { background-color: #44403c; }
-        .btn-success { background-color: #14532d; color: #bbf7d0; border: 1px solid #166534; }
-        .btn-success:hover { background-color: #166534; }
-        .btn-danger { background-color: #450a0a; color: #fca5a5; border: 1px solid #991b1b; }
-        
-        /* Tab Navigation */
-        .tab-scroll { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #292524; margin-bottom: 1.5rem; }
-        .tab-btn {
-            padding: 0.5rem 0; border-bottom: 2px solid transparent; 
-            color: #78716c; font-family: 'Cinzel', serif; font-weight: bold; font-size: 1.1rem;
-            white-space: nowrap; transition: all 0.2s; cursor: pointer;
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        .tab-btn.active { color: #d6d3d1; border-bottom-color: #d6d3d1; }
-        
-        .tab-content { display: none; animation: fadeIn 0.2s ease-in-out; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .hidden-view { display: none !important; }
-
-        /* Read View Formatting */
-        .read-section { margin-bottom: 2rem; }
-        .read-section h4 { color: #a8a29e; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; font-weight: bold; border-bottom: 1px solid #292524; padding-bottom: 0.25rem; font-family: 'Space Mono', monospace;}
-        .read-data { margin-bottom: 1rem; }
-        .read-label { font-size: 0.7rem; color: #78716c; text-transform: uppercase; font-family: 'Space Mono', monospace;}
-        .read-value { font-size: 1.05rem; color: #f5f5f4; white-space: pre-wrap; font-family: sans-serif;}
-
-        /* Character Card in Read Mode */
-        .char-card { background: #151312; border: 1px solid #44403c; border-left: 3px solid #78716c; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            word-wrap: break-word;
+        }
+        .user-message {
+            align-self: flex-end;
+            background-color: #dcf8c6;
+            border-bottom-right-radius: 0;
+        }
+        .ai-message {
+            align-self: flex-start;
+            background-color: #ffffff;
+            border-bottom-left-radius: 0;
+        }
+        .message-header {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .message-body {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #333;
+        }
+        .message-body em {
+            color: #555;
+        }
+        .character-card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+        .character-card h2 { 
+            margin-top: 0; 
+            color: #222;
+            border-bottom: 2px solid #e5ddd5;
+            padding-bottom: 10px;
+        }
+        .character-card strong {
+            color: #444;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-4xl mx-auto min-h-screen flex flex-col">
+<body>
 
-    <header class="mb-8 border-b border-stone-800 pb-4 flex justify-between items-end">
-        <div>
-            <h1 class="text-3xl font-bold cinzel text-stone-200 tracking-wider">The Archive</h1>
-        </div>
-        <button onclick="openEditor()" class="btn btn-success">+ Initialize</button>
-    </header>
+    <div class="header">
+        <h1>Character.AI Export Viewer</h1>
+        <p>Select your <code>message.json</code> or <code>character.json</code> file below to format it into a readable interface.</p>
+        <input type="file" id="fileInput" accept=".json">
+    </div>
 
-    <main id="view-dashboard" class="flex-grow">
-        <div id="itemList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            </div>
-    </main>
-
-    <main id="view-read" class="flex-grow hidden-view bg-stone-900/50 p-6 rounded-xl border border-stone-800 backdrop-blur-sm shadow-2xl">
-        <div class="flex justify-between items-start mb-6 pb-4 border-b border-stone-800">
-            <div>
-                <button onclick="closeToDashboard()" class="text-stone-500 hover:text-stone-300 font-mono text-xs mb-3 transition-colors">← RETURN TO INDEX</button>
-                <h2 id="read-title" class="text-3xl font-bold text-stone-200 cinzel">Script Title</h2>
-                <p id="read-universe" class="text-amber-700 font-mono text-sm mt-1 uppercase">Universe Name</p>
-            </div>
-            <button onclick="editCurrentRead()" class="btn btn-primary text-xs">Modify Record</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <div class="read-section">
-                    <h4>The Avatar</h4>
-                    <div class="read-data"><div class="read-label">Full Name & Aliases</div><div id="read-avatar-name" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Age & Demographics</div><div id="read-avatar-age" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Physical Appearance</div><div id="read-avatar-looks" class="read-value text-sm text-stone-300"></div></div>
-                    <div class="read-data"><div class="read-label">Personality & Skills</div><div id="read-avatar-skills" class="read-value text-sm text-stone-300"></div></div>
-                </div>
-
-                <div class="read-section">
-                    <h4>System Codes & Rules</h4>
-                    <div class="read-data"><div class="read-label">Return / Leave Codes</div><div id="read-code-safe" class="read-value text-red-900 font-mono font-bold"></div></div>
-                    <div class="read-data"><div class="read-label">Time Ratio</div><div id="read-code-time" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Immunities & Conditions</div><div id="read-code-rules" class="read-value text-sm text-stone-300"></div></div>
-                    <div class="read-data"><div class="read-label">Scripted Events</div><div id="read-code-events" class="read-value text-sm text-stone-300"></div></div>
-                </div>
-            </div>
-            
-            <div>
-                <div class="read-section">
-                    <h4>The Blueprint</h4>
-                    <div class="read-data"><div class="read-label">Arrival Location</div><div id="read-world-location" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">Era / Timeline</div><div id="read-world-era" class="read-value"></div></div>
-                    <div class="read-data"><div class="read-label">World Lore & Rules</div><div id="read-world-lore" class="read-value text-sm text-stone-300"></div></div>
-                </div>
-
-                <div class="read-section">
-                    <h4>The Roster</h4>
-                    <div id="read-roster-list">
-                        </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <main id="view-editor" class="flex-grow hidden-view">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-stone-200 cinzel" id="editorTitle">Initialize Entry</h2>
-            <div class="space-x-2">
-                <button onclick="closeEditor()" class="btn btn-primary bg-transparent">Cancel</button>
-                <button onclick="saveRecord()" class="btn btn-success">Commit Changes</button>
-            </div>
-        </div>
-
-        <div class="field-group">
-            <div class="field-row">
-                <label>Designation / Script Title</label>
-                <input type="text" id="inpTitle" placeholder="e.g., Hogwarts Year 4">
-            </div>
-            <div class="field-row">
-                <label>Destination Universe</label>
-                <input type="text" id="inpUniverse" placeholder="e.g., Wizarding World">
-            </div>
-        </div>
-
-        <div class="tab-scroll">
-            <button onclick="switchTab('tab-avatar')" id="btn-avatar" class="tab-btn active">The Avatar</button>
-            <button onclick="switchTab('tab-world')" id="btn-world" class="tab-btn">The Blueprint</button>
-            <button onclick="switchTab('tab-rules')" id="btn-rules" class="tab-btn">The Code</button>
-            <button onclick="switchTab('tab-roster')" id="btn-roster" class="tab-btn">The Roster</button>
-        </div>
-
-        <div id="tab-avatar" class="tab-content active">
-            <div class="field-group">
-                <div class="field-row">
-                    <label>Full Name & Aliases</label>
-                    <input type="text" id="inpAvatarName" placeholder="Your name in this reality...">
-                </div>
-                <div class="field-row">
-                    <label>Age, Gender & Background</label>
-                    <input type="text" id="inpAvatarAge" placeholder="e.g., 16 years old, Female, English...">
-                </div>
-                <div class="field-row">
-                    <label>Physical Appearance</label>
-                    <textarea id="inpAvatarLooks" placeholder="Height, weight, eyes, skin, clothing style..."></textarea>
-                </div>
-                <div class="field-row">
-                    <label>Personality, Skills & Extras</label>
-                    <textarea id="inpAvatarSkills" placeholder="Traits, languages spoken, special items (wands, pets)..."></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-world" class="tab-content">
-            <div class="field-group">
-                <div class="field-row">
-                    <label>Arrival Location</label>
-                    <input type="text" id="inpWorldLoc" placeholder="Where exactly do you wake up?">
-                </div>
-                <div class="field-row">
-                    <label>Era / Timestamp</label>
-                    <input type="text" id="inpWorldEra" placeholder="e.g., September 1st, 1991">
-                </div>
-                <div class="field-row">
-                    <label>World Lore & Mechanics</label>
-                    <textarea id="inpWorldLore" placeholder="How does the world work? Money status? Differences from canon?"></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-rules" class="tab-content">
-            <div class="field-group">
-                <div class="field-row">
-                    <label>Return & Leave Codes</label>
-                    <input type="text" id="inpRulesSafe" placeholder="e.g., Safe word: Turinza. Leave word: Viturio.">
-                </div>
-                <div class="field-row">
-                    <label>Time Ratio</label>
-                    <input type="text" id="inpRulesTime" placeholder="e.g., 8 hours in CR = 4 years in DR">
-                </div>
-                <div class="field-row">
-                    <label>Immunities & System Rules</label>
-                    <textarea id="inpRulesImmune" placeholder="High pain tolerance, cannot die, always wake up rested..."></textarea>
-                </div>
-                <div class="field-row">
-                    <label>Scripted Events</label>
-                    <textarea id="inpRulesEvents" placeholder="Events that MUST happen (e.g., Sorted into Gryffindor, befriending trio...)"></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-roster" class="tab-content">
-            <div id="roster-editor-container">
-                </div>
-            <button onclick="addCharacterForm()" class="btn btn-primary w-full border-dashed text-stone-400 mt-2 hover:text-stone-200">+ Add Character Profile</button>
-        </div>
-        
-        <div class="mt-8 text-right border-t border-stone-800 pt-4">
-            <button id="btnDelete" onclick="deleteCurrentRecord()" class="btn btn-danger hidden">Purge Record</button>
-        </div>
-    </main>
+    <div id="output" class="chat-container"></div>
 
     <script>
-        let appData = [];
-        const STORAGE_KEY = 'archive_dr_scripts_v4';
-        let currentViewingId = null;
-        
-        // Temporary array to hold characters while editing a script
-        let editingRoster = [];
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try { appData = JSON.parse(stored); } 
-                catch(e) { appData = []; }
-            }
-            renderDashboard();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    renderData(data, file.name);
+                } catch (err) {
+                    alert("Error reading JSON file. Make sure it's a valid JSON format.\n\nDetails: " + err.message);
+                }
+            };
+            reader.readAsText(file);
         });
 
-        function saveData() { 
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); 
-            renderDashboard(); 
-        }
+        function renderData(data, fileName) {
+            const container = document.getElementById('output');
+            container.innerHTML = ''; // Clear previous outputs
 
-        // --- VIEW MANAGEMENT ---
-        function showView(viewId) {
-            document.getElementById('view-dashboard').classList.add('hidden-view');
-            document.getElementById('view-read').classList.add('hidden-view');
-            document.getElementById('view-editor').classList.add('hidden-view');
-            document.getElementById(viewId).classList.remove('hidden-view');
-        }
+            // Normalize the data array (in case it's a single object)
+            const items = Array.isArray(data) ? data : [data];
+            const isCharacterFile = fileName.toLowerCase().includes('character');
 
-        // --- DASHBOARD ---
-        function renderDashboard() {
-            const listContainer = document.getElementById('itemList');
-            listContainer.innerHTML = '';
-            
-            if (appData.length === 0) {
-                listContainer.innerHTML = '<div class="col-span-1 md:col-span-2 text-center p-8 bg-[#151312] rounded-xl text-stone-500 border border-stone-800 font-mono text-sm">No classified records found. Initialize above.</div>';
-                return;
-            }
-
-            appData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'bg-[#151312] p-5 rounded border-l-4 border-stone-600 border-y border-r border-y-stone-800 border-r-stone-800 cursor-pointer hover:border-l-stone-300 transition-all';
-                div.onclick = () => openReadView(item.id); 
-                div.innerHTML = `
-                    <h3 class="font-bold text-lg text-stone-200 cinzel">${item.title}</h3>
-                    <p class="text-amber-700/80 text-xs font-mono uppercase tracking-wider mb-2">${item.universe || 'Unknown Universe'}</p>
-                    <p class="text-stone-500 text-sm line-clamp-2">${item.world_lore || 'No world lore added yet...'}</p>
-                `;
-                listContainer.appendChild(div);
+            items.forEach(item => {
+                if (isCharacterFile || item.name || item.title) {
+                    renderCharacter(item, container);
+                } else {
+                    renderMessage(item, container);
+                }
             });
-            showView('view-dashboard');
         }
 
-        // --- READ VIEW ---
-        function openReadView(id) {
-            currentViewingId = id;
-            const script = appData.find(s => s.id === id);
+        function renderCharacter(char, container) {
+            const card = document.createElement('div');
+            card.classList.add('character-card');
+
+            const title = char.name || char.title || "Unknown Character";
             
-            document.getElementById('read-title').innerText = script.title || 'Untitled';
-            document.getElementById('read-universe').innerText = script.universe || 'Unspecified Universe';
-            
-            document.getElementById('read-avatar-name').innerText = script.avatar_name || '--';
-            document.getElementById('read-avatar-age').innerText = script.avatar_age || '--';
-            document.getElementById('read-avatar-looks').innerText = script.avatar_looks || '--';
-            document.getElementById('read-avatar-skills').innerText = script.avatar_skills || '--';
-            
-            document.getElementById('read-code-safe').innerText = script.rules_safe || '--';
-            document.getElementById('read-code-time').innerText = script.rules_time || '--';
-            document.getElementById('read-code-rules').innerText = script.rules_immune || '--';
-            document.getElementById('read-code-events').innerText = script.rules_events || '--';
+            // Safely parse out text and replace line breaks
+            const formatText = (text) => text ? text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') : 'N/A';
 
-            document.getElementById('read-world-location').innerText = script.world_loc || '--';
-            document.getElementById('read-world-era').innerText = script.world_era || '--';
-            document.getElementById('read-world-lore').innerText = script.world_lore || '--';
+            const greeting = char.greeting ? `<p><strong>Greeting:</strong><br>${formatText(char.greeting)}</p>` : '';
+            const description = char.description ? `<p><strong>Description:</strong><br>${formatText(char.description)}</p>` : '';
+            const definition = char.definition ? `<p><strong>Definition:</strong><br>${formatText(char.definition)}</p>` : '';
 
-            // Render Character Cards
-            const rosterContainer = document.getElementById('read-roster-list');
-            rosterContainer.innerHTML = '';
-            if(script.roster && script.roster.length > 0) {
-                script.roster.forEach(char => {
-                    rosterContainer.innerHTML += `
-                        <div class="char-card">
-                            <div class="flex justify-between items-baseline mb-1">
-                                <h5 class="font-bold text-stone-200 font-sans">${char.name}</h5>
-                                <span class="text-[10px] font-mono uppercase text-amber-600 border border-amber-900/50 px-1 rounded bg-amber-900/10">${char.role}</span>
-                            </div>
-                            <p class="text-sm text-stone-400 font-sans">${char.details}</p>
-                        </div>
-                    `;
-                });
-            } else {
-                rosterContainer.innerHTML = '<p class="text-sm text-stone-600 font-mono">No characters indexed.</p>';
-            }
-
-            showView('view-read');
-        }
-
-        function closeToDashboard() {
-            currentViewingId = null;
-            renderDashboard();
-        }
-
-        // --- EDITOR VIEW & ROSTER LOGIC ---
-        function openEditor(id = null) {
-            switchTab('tab-avatar'); 
-            const rosterContainer = document.getElementById('roster-editor-container');
-            rosterContainer.innerHTML = '';
-            
-            if (id) {
-                const script = appData.find(s => s.id === id);
-                document.getElementById('editorTitle').innerText = "Modify Record";
-                document.getElementById('btnDelete').classList.remove('hidden');
-                
-                document.getElementById('inpTitle').value = script.title || '';
-                document.getElementById('inpUniverse').value = script.universe || '';
-                
-                document.getElementById('inpAvatarName').value = script.avatar_name || '';
-                document.getElementById('inpAvatarAge').value = script.avatar_age || '';
-                document.getElementById('inpAvatarLooks').value = script.avatar_looks || '';
-                document.getElementById('inpAvatarSkills').value = script.avatar_skills || '';
-
-                document.getElementById('inpWorldLoc').value = script.world_loc || '';
-                document.getElementById('inpWorldEra').value = script.world_era || '';
-                document.getElementById('inpWorldLore').value = script.world_lore || '';
-
-                document.getElementById('inpRulesSafe').value = script.rules_safe || '';
-                document.getElementById('inpRulesTime').value = script.rules_time || '';
-                document.getElementById('inpRulesImmune').value = script.rules_immune || '';
-                document.getElementById('inpRulesEvents').value = script.rules_events || '';
-
-                // Load Characters into editor
-                editingRoster = JSON.parse(JSON.stringify(script.roster || []));
-                editingRoster.forEach(char => renderCharacterForm(char.id, char.name, char.role, char.details));
-
-            } else {
-                currentViewingId = null;
-                document.getElementById('editorTitle').innerText = "Initialize Record";
-                document.getElementById('btnDelete').classList.add('hidden');
-                document.querySelectorAll('input, textarea').forEach(el => el.value = '');
-                editingRoster = [];
-            }
-            showView('view-editor');
-        }
-
-        function editCurrentRead() { openEditor(currentViewingId); }
-
-        function closeEditor() {
-            if (currentViewingId) openReadView(currentViewingId); 
-            else renderDashboard(); 
-        }
-
-        // -- DYNAMIC CHARACTER FORMS --
-        function addCharacterForm() {
-            const charId = crypto.randomUUID();
-            editingRoster.push({ id: charId, name: '', role: 'Friend', details: '' });
-            renderCharacterForm(charId, '', 'Friend', '');
-        }
-
-        function renderCharacterForm(id, name, role, details) {
-            const container = document.getElementById('roster-editor-container');
-            const charDiv = document.createElement('div');
-            charDiv.className = 'field-group relative';
-            charDiv.id = `char-${id}`;
-            charDiv.innerHTML = `
-                <button onclick="removeCharacter('${id}')" class="absolute top-2 right-2 text-stone-600 hover:text-red-500 font-mono text-xs">✕</button>
-                <div class="field-row">
-                    <label>Character Name</label>
-                    <input type="text" placeholder="e.g., Hermione Granger" value="${name}" onchange="updateChar('${id}', 'name', this.value)">
-                </div>
-                <div class="field-row">
-                    <label>Role / Category</label>
-                    <select onchange="updateChar('${id}', 'role', this.value)">
-                        <option value="Friend" ${role === 'Friend' ? 'selected' : ''}>Friend / Ally</option>
-                        <option value="Family" ${role === 'Family' ? 'selected' : ''}>Family</option>
-                        <option value="Romantic" ${role === 'Romantic' ? 'selected' : ''}>Romantic Interest</option>
-                        <option value="Enemy" ${role === 'Enemy' ? 'selected' : ''}>Enemy / Rival</option>
-                        <option value="Other" ${role === 'Other' ? 'selected' : ''}>Other</option>
-                    </select>
-                </div>
-                <div class="field-row">
-                    <label>Relationship Dynamics & Details</label>
-                    <textarea placeholder="Describe how you interact, history, feelings..." onchange="updateChar('${id}', 'details', this.value)">${details}</textarea>
-                </div>
+            card.innerHTML = `
+                <h2>${title}</h2>
+                ${greeting}
+                ${description}
+                ${definition}
             `;
-            container.appendChild(charDiv);
+            container.appendChild(card);
         }
 
-        function updateChar(id, field, value) {
-            const char = editingRoster.find(c => c.id === id);
-            if(char) char[field] = value;
-        }
+        function renderMessage(msg, container) {
+            // Your message.json utilizes a mix of raw_content and text schemas
+            const text = msg.text || msg.raw_content || msg.content;
+            if (!text) return; 
 
-        function removeCharacter(id) {
-            editingRoster = editingRoster.filter(c => c.id !== id);
-            document.getElementById(`char-${id}`).remove();
-        }
-
-        // --- SAVE LOGIC ---
-        function saveRecord() {
-            const title = document.getElementById('inpTitle').value;
-            if(!title) { alert("Designation / Title is required."); return; }
-
-            const scriptData = {
-                title: title,
-                universe: document.getElementById('inpUniverse').value,
-                
-                avatar_name: document.getElementById('inpAvatarName').value,
-                avatar_age: document.getElementById('inpAvatarAge').value,
-                avatar_looks: document.getElementById('inpAvatarLooks').value,
-                avatar_skills: document.getElementById('inpAvatarSkills').value,
-
-                world_loc: document.getElementById('inpWorldLoc').value,
-                world_era: document.getElementById('inpWorldEra').value,
-                world_lore: document.getElementById('inpWorldLore').value,
-
-                rules_safe: document.getElementById('inpRulesSafe').value,
-                rules_time: document.getElementById('inpRulesTime').value,
-                rules_immune: document.getElementById('inpRulesImmune').value,
-                rules_events: document.getElementById('inpRulesEvents').value,
-
-                roster: editingRoster, // Save the dynamic array
-                
-                lastEdited: new Date().toISOString()
-            };
-
-            if (currentViewingId) {
-                const index = appData.findIndex(s => s.id === currentViewingId);
-                if(index !== -1) { appData[index] = { ...appData[index], ...scriptData }; }
-            } else {
-                scriptData.id = crypto.randomUUID();
-                appData.unshift(scriptData);
-                currentViewingId = scriptData.id; 
+            // Determine if the message came from the user or the AI character
+            let senderName = msg.src || (msg.candidate_id ? "AI" : "User");
+            let isUser = false;
+            
+            // Logic tailored to your JSON parameters
+            if (msg.src) {
+                isUser = true; // In your format, 'src' indicates the human persona
+            } else if (msg.candidate_id) {
+                isUser = false; // AI responses
             }
 
-            saveData();
-            openReadView(currentViewingId); 
-        }
-
-        function deleteCurrentRecord() {
-            if(confirm("Classified action: Delete this script forever?")) {
-                appData = appData.filter(item => item.id !== currentViewingId);
-                currentViewingId = null;
-                saveData();
+            let time = msg.created || msg.create_time || "";
+            if (time) {
+                time = new Date(time).toLocaleString();
             }
-        }
 
-        // --- TAB LOGIC ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById(`btn-${tabId.split('-')[1]}`).classList.add('active');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+
+            const headerDiv = document.createElement('div');
+            headerDiv.classList.add('message-header');
+            
+            let displaySender = senderName;
+            if (msg.tgt) {
+                displaySender = isUser ? `${msg.src} \u2192 ${msg.tgt}` : senderName;
+            }
+
+            headerDiv.innerText = `${displaySender} ${time ? ' \u2022 ' + time : ''}`;
+
+            const bodyDiv = document.createElement('div');
+            bodyDiv.classList.add('message-body');
+            
+            // Format text (converting \n to actual line breaks and asterisk-wrapped text into italics)
+            let formattedText = text.replace(/\\n/g, '\n').replace(/\n/g, '<br>');
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>*$1*</em>'); // Retains italic styling for actions
+            bodyDiv.innerHTML = formattedText;
+
+            messageDiv.appendChild(headerDiv);
+            messageDiv.appendChild(bodyDiv);
+            container.appendChild(messageDiv);
         }
     </script>
 </body>
