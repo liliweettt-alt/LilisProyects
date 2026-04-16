@@ -85,8 +85,19 @@
             border-bottom: 2px solid #e5ddd5;
             padding-bottom: 10px;
         }
-        .character-card strong {
-            color: #444;
+        .conversation-divider {
+            text-align: center;
+            color: #666;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 25px 0 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            align-self: center;
+            width: 80%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -121,17 +132,57 @@
             const container = document.getElementById('output');
             container.innerHTML = ''; // Clear previous outputs
 
-            // Normalize the data array (in case it's a single object)
             const items = Array.isArray(data) ? data : [data];
             const isCharacterFile = fileName.toLowerCase().includes('character');
 
-            items.forEach(item => {
-                if (isCharacterFile || item.name || item.title) {
-                    renderCharacter(item, container);
-                } else {
-                    renderMessage(item, container);
-                }
-            });
+            if (isCharacterFile) {
+                // Render characters as cards
+                items.forEach(item => {
+                    if (item.name || item.title) {
+                        renderCharacter(item, container);
+                    }
+                });
+            } else {
+                // Parse and standardize messages
+                const parsedMessages = [];
+
+                items.forEach(msg => {
+                    let text = msg.text || msg.raw_content || msg.content;
+                    if (!text) return; 
+
+                    let isUser = !!msg.src;
+                    let sender = msg.src || (msg.candidate_id ? "AI" : "User");
+                    if (msg.tgt && isUser) {
+                        sender = `${msg.src} \u2192 ${msg.tgt}`;
+                    }
+
+                    // Grab timestamp (handles both user 'created' and AI 'create_time')
+                    let rawTime = msg.created || msg.create_time;
+                    let timestamp = rawTime ? new Date(rawTime) : new Date(0);
+
+                    parsedMessages.push({ text, isUser, sender, timestamp });
+                });
+
+                // Sort everything chronologically!
+                parsedMessages.sort((a, b) => a.timestamp - b.timestamp);
+
+                // Render with conversation dividers
+                let lastTime = null;
+                const FOUR_HOURS_IN_MS = 4 * 60 * 60 * 1000;
+
+                parsedMessages.forEach(msg => {
+                    // If gap between messages is > 4 hours, start a new session visually
+                    if (lastTime && (msg.timestamp - lastTime > FOUR_HOURS_IN_MS)) {
+                        const divider = document.createElement('div');
+                        divider.classList.add('conversation-divider');
+                        divider.innerText = "New Conversation Session";
+                        container.appendChild(divider);
+                    }
+                    lastTime = msg.timestamp;
+
+                    renderMessage(msg, container);
+                });
+            }
         }
 
         function renderCharacter(char, container) {
@@ -139,64 +190,32 @@
             card.classList.add('character-card');
 
             const title = char.name || char.title || "Unknown Character";
-            
-            // Safely parse out text and replace line breaks
             const formatText = (text) => text ? text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') : 'N/A';
 
             const greeting = char.greeting ? `<p><strong>Greeting:</strong><br>${formatText(char.greeting)}</p>` : '';
             const description = char.description ? `<p><strong>Description:</strong><br>${formatText(char.description)}</p>` : '';
             const definition = char.definition ? `<p><strong>Definition:</strong><br>${formatText(char.definition)}</p>` : '';
 
-            card.innerHTML = `
-                <h2>${title}</h2>
-                ${greeting}
-                ${description}
-                ${definition}
-            `;
+            card.innerHTML = `<h2>${title}</h2>${greeting}${description}${definition}`;
             container.appendChild(card);
         }
 
         function renderMessage(msg, container) {
-            // Your message.json utilizes a mix of raw_content and text schemas
-            const text = msg.text || msg.raw_content || msg.content;
-            if (!text) return; 
-
-            // Determine if the message came from the user or the AI character
-            let senderName = msg.src || (msg.candidate_id ? "AI" : "User");
-            let isUser = false;
-            
-            // Logic tailored to your JSON parameters
-            if (msg.src) {
-                isUser = true; // In your format, 'src' indicates the human persona
-            } else if (msg.candidate_id) {
-                isUser = false; // AI responses
-            }
-
-            let time = msg.created || msg.create_time || "";
-            if (time) {
-                time = new Date(time).toLocaleString();
-            }
-
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
-            messageDiv.classList.add(isUser ? 'user-message' : 'ai-message');
+            messageDiv.classList.add(msg.isUser ? 'user-message' : 'ai-message');
 
             const headerDiv = document.createElement('div');
             headerDiv.classList.add('message-header');
             
-            let displaySender = senderName;
-            if (msg.tgt) {
-                displaySender = isUser ? `${msg.src} \u2192 ${msg.tgt}` : senderName;
-            }
-
-            headerDiv.innerText = `${displaySender} ${time ? ' \u2022 ' + time : ''}`;
+            let timeStr = msg.timestamp.getTime() > 0 ? msg.timestamp.toLocaleString() : "";
+            headerDiv.innerText = `${msg.sender} ${timeStr ? ' \u2022 ' + timeStr : ''}`;
 
             const bodyDiv = document.createElement('div');
             bodyDiv.classList.add('message-body');
             
-            // Format text (converting \n to actual line breaks and asterisk-wrapped text into italics)
-            let formattedText = text.replace(/\\n/g, '\n').replace(/\n/g, '<br>');
-            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>*$1*</em>'); // Retains italic styling for actions
+            let formattedText = msg.text.replace(/\\n/g, '\n').replace(/\n/g, '<br>');
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>*$1*</em>');
             bodyDiv.innerHTML = formattedText;
 
             messageDiv.appendChild(headerDiv);
