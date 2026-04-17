@@ -15,7 +15,11 @@
     --msg-user: #43362a;
     --msg-ai: #2d2925;
     --border: #3d3630;
+    --btn-bg: #3d3630;
+    --btn-hover: #544b43;
   }
+
+  * { box-sizing: border-box; } /* Ensures padding doesn't break widths/heights */
 
   body {
     margin: 0;
@@ -27,13 +31,13 @@
     overflow: hidden;
   }
 
-  /* Sidebar Styling */
   #sidebar {
     width: 320px;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
+    min-height: 0; /* FIX: Forces sidebar to stop exactly at the bottom of the screen */
   }
 
   .header-area {
@@ -46,78 +50,66 @@
     margin: 0 0 5px 0;
     color: var(--accent);
     font-weight: normal;
-    letter-spacing: 1px;
     text-transform: uppercase;
   }
 
-  .subtitle {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 15px;
-    font-style: italic;
-  }
+  .subtitle { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px; font-style: italic; }
 
-  input[type="file"] {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    width: 100%;
-    cursor: pointer;
-  }
+  input[type="file"] { font-size: 0.9rem; color: var(--text-secondary); width: 100%; cursor: pointer; }
 
-  #contact-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
-    flex: 1;
+  #contact-list { 
+    list-style: none; 
+    padding: 0 0 40px 0; /* FIX: Adds empty space at the very bottom so you can see the last items clearly */
+    margin: 0; 
+    overflow-y: auto; 
+    flex: 1; 
   }
 
   #contact-list li {
     padding: 15px 20px;
     border-bottom: 1px solid var(--border);
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s;
     font-size: 1.1rem;
-  }
-
-  #contact-list li:hover, #contact-list li.active {
-    background-color: var(--msg-user);
-    color: #fff;
-  }
-
-  /* Chat Area Styling */
-  #chat-area {
-    flex: 1;
     display: flex;
-    flex-direction: column;
-    background-color: var(--chat-bg);
+    justify-content: space-between;
+    align-items: center;
   }
+
+  #contact-list li:hover, #contact-list li.active { background-color: var(--msg-user); color: #fff; }
+
+  #chat-area { flex: 1; display: flex; flex-direction: column; background-color: var(--chat-bg); min-height: 0; }
 
   #chat-header {
-    padding: 20px 30px;
+    padding: 15px 30px;
     border-bottom: 1px solid var(--border);
-    font-size: 1.4rem;
-    color: var(--accent);
     background-color: var(--sidebar-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  .hint {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-style: italic;
-  }
+  #chat-title-area { display: flex; flex-direction: column; }
+  #chat-title { font-size: 1.4rem; color: var(--accent); font-weight: bold; }
+  .hint { font-size: 0.85rem; color: var(--text-secondary); font-style: italic; margin-top: 4px; }
 
-  #messages {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  .btn-group { display: flex; gap: 10px; }
+
+  button {
+    background-color: var(--btn-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: background 0.2s;
   }
+  
+  button:hover { background-color: var(--btn-hover); }
+
+  #messages { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
 
   .msg {
     max-width: 65%;
@@ -127,38 +119,17 @@
     font-size: 1.05rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     cursor: pointer;
-    transition: transform 0.1s, background-color 0.2s;
+    transition: transform 0.1s;
   }
 
-  .msg:hover {
-    transform: scale(1.01);
-  }
+  .msg:hover { transform: scale(1.01); box-shadow: 0 0 8px var(--accent); }
+  .msg i { color: var(--text-secondary); }
 
-  .msg i {
-    color: var(--text-secondary);
-  }
+  .msg-user { align-self: flex-end; background-color: var(--msg-user); border-bottom-right-radius: 0; }
+  .msg-ai { align-self: flex-start; background-color: var(--msg-ai); border: 1px solid var(--border); border-bottom-left-radius: 0; }
 
-  .msg-user {
-    align-self: flex-end;
-    background-color: var(--msg-user);
-    border-bottom-right-radius: 0;
-  }
-
-  .msg-ai {
-    align-self: flex-start;
-    background-color: var(--msg-ai);
-    border: 1px solid var(--border);
-    border-bottom-left-radius: 0;
-  }
-
-  .time {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    text-align: right;
-    display: block;
-  }
-
+  .time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; text-align: right; display: block; }
+  
   /* Scrollbar Customization */
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg-color); }
@@ -171,7 +142,7 @@
 <div id="sidebar">
   <div class="header-area">
     <h1>The Archive</h1>
-    <div class="subtitle">Click any message to swap sides!</div>
+    <div class="subtitle">Click any message to fix its side!</div>
     <input type="file" id="file-input" accept=".json" />
   </div>
   <ul id="contact-list"></ul>
@@ -179,27 +150,32 @@
 
 <div id="chat-area">
   <div id="chat-header">
-    <span>Select a conversation</span>
-    <span class="hint">Click a message to switch its sender</span>
+    <div id="chat-title-area">
+      <span id="chat-title">Select a conversation</span>
+      <span class="hint">Click a message to switch who sent it</span>
+    </div>
+    <div class="btn-group">
+      <button id="btn-rename" style="display:none;" onclick="renameCurrentChat()">Rename Chat</button>
+      <button id="btn-export" style="display:none;" onclick="exportCurrentChat()">Export to TXT</button>
+    </div>
   </div>
   <div id="messages"></div>
 </div>
 
 <script>
   let conversations = {};
+  let currentChatKey = null;
 
   document.getElementById('file-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
         const data = JSON.parse(e.target.result);
         processData(data);
       } catch (err) {
-        alert("Error reading JSON file.");
-        console.error(err);
+        alert("Error reading JSON file. Make sure it is formatted correctly.");
       }
     };
     reader.readAsText(file);
@@ -207,20 +183,16 @@
 
   function processData(data) {
     let mapped = [];
-
-    // 1. Separate the two completely different JSON formats
     data.forEach(item => {
       if (item.src && item.tgt && item.text) {
-        // Old Format (mostly just your exported messages)
         mapped.push({
           id: "old_" + item.tgt,
           name: item.tgt + " (Old Archive)",
           text: item.text,
           time: new Date(item.created || item.create_time),
-          isUser: true // These are almost always Elizabeth
+          isUser: true 
         });
       } else if (item.chat_id && item.raw_content) {
-        // New Format (contains the interleaved back-and-forth)
         mapped.push({
           id: item.chat_id,
           text: item.raw_content,
@@ -229,7 +201,6 @@
       }
     });
 
-    // 2. Group by chat session
     let groups = {};
     mapped.forEach(m => {
       if (!groups[m.id]) groups[m.id] = [];
@@ -237,46 +208,27 @@
     });
 
     conversations = {};
-
-    // 3. Sort chronologically and figure out who the character is
     for (let id in groups) {
       let msgs = groups[id];
       msgs.sort((a, b) => a.time - b.time);
       
       let name = msgs[0].name; 
-      
-      // Auto-detect the character name by scanning the chat text
-      if (!name) {
-        let sample = msgs.slice(0, 15).map(m => m.text).join(" ");
-        if (sample.includes("Miguel")) name = "Miguel O'Hara";
-        else if (sample.includes("Draco") || sample.includes("Malfoy")) name = "Draco Malfoy";
-        else if (sample.includes("Loki")) name = "Loki";
-        else if (sample.includes("Hermione") || sample.includes("Granger")) name = "Hermione Granger";
-        else if (sample.includes("Sebastian") || sample.includes("Sallow")) name = "Sebastian Sallow";
-        else if (sample.includes("Spencer") || sample.includes("Reid")) name = "Spencer Reid";
-        else if (sample.includes("Snape")) name = "Severus Snape";
-        else if (sample.includes("Ominis")) name = "Ominis Gaunt";
-        else name = "Unknown Chat (" + id.substring(0, 4) + ")";
-      }
+      if (!name) name = "Unknown Chat (" + id.substring(0, 4) + ")";
 
-      // Figure out who is talking based on your RP style
       let currentUser = true;
       msgs.forEach((m, i) => {
-        if (m.isUser !== undefined) return; // Skip if already set
-        
+        if (m.isUser !== undefined) return; 
         let t = m.text;
         if (t.includes("*She ") || t.includes("*I ") || t.startsWith("AJ:") || t.startsWith("Elizabeth:")) {
           currentUser = true;
-        } else if (t.includes("*He ") || t.includes("Draco:") || t.includes("Miguel:") || t.includes("Loki:")) {
+        } else if (t.includes("*He ")) {
           currentUser = false;
         } else {
-          // If unsure, alternate from the previous message
           if (i > 0) currentUser = !msgs[i-1].isUser;
         }
         m.isUser = currentUser;
       });
 
-      // Handle names overlapping (e.g. if you have multiple separate chats with Miguel)
       let finalName = name;
       let counter = 2;
       while (conversations[finalName]) {
@@ -285,16 +237,13 @@
       }
       conversations[finalName] = msgs;
     }
-
     renderContacts();
   }
 
   function formatText(text) {
     const div = document.createElement('div');
     div.innerText = text; 
-    let escaped = div.innerHTML;
-    escaped = escaped.replace(/\*([^*]+)\*/g, '<i>*$1*</i>');
-    return escaped.replace(/\n/g, '<br>');
+    return div.innerHTML.replace(/\*([^*]+)\*/g, '<i>*$1*</i>').replace(/\n/g, '<br>');
   }
 
   function renderContacts() {
@@ -307,6 +256,7 @@
       li.onclick = () => {
         document.querySelectorAll('#contact-list li').forEach(el => el.classList.remove('active'));
         li.classList.add('active');
+        currentChatKey = char;
         renderMessages(char);
       };
       list.appendChild(li);
@@ -318,7 +268,10 @@
   }
 
   function renderMessages(char) {
-    document.getElementById('chat-header').firstElementChild.textContent = char;
+    document.getElementById('chat-title').textContent = char;
+    document.getElementById('btn-rename').style.display = 'block';
+    document.getElementById('btn-export').style.display = 'block';
+    
     const msgContainer = document.getElementById('messages');
     msgContainer.innerHTML = '';
 
@@ -330,21 +283,52 @@
       
       msgDiv.innerHTML = formatText(m.text) + `<span class="time">${timeStr}</span>`;
       
-      // Allow user to click to manually swap sides
       msgDiv.onclick = function() {
-        if (this.classList.contains('msg-user')) {
-          this.classList.remove('msg-user');
-          this.classList.add('msg-ai');
-        } else {
-          this.classList.remove('msg-ai');
-          this.classList.add('msg-user');
-        }
+        m.isUser = !m.isUser;
+        this.className = 'msg ' + (m.isUser ? 'msg-user' : 'msg-ai');
       };
 
       msgContainer.appendChild(msgDiv);
     });
-    
     msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+
+  function renameCurrentChat() {
+    if (!currentChatKey) return;
+    const newName = prompt("Enter a new name for this conversation:", currentChatKey);
+    if (newName && newName !== currentChatKey && newName.trim() !== "") {
+      conversations[newName] = conversations[currentChatKey];
+      delete conversations[currentChatKey];
+      currentChatKey = newName;
+      renderContacts();
+      Array.from(document.querySelectorAll('#contact-list li')).find(li => li.textContent === newName).click();
+    }
+  }
+
+  function exportCurrentChat() {
+    if (!currentChatKey) return;
+    const msgs = conversations[currentChatKey];
+    
+    let textContent = `Conversation: ${currentChatKey}\nExported on: ${new Date().toLocaleString()}\n`;
+    textContent += `========================================================\n\n`;
+
+    msgs.forEach(m => {
+      const speaker = m.isUser ? "You" : currentChatKey.replace(/ \(.*?\)/g, "");
+      textContent += `${speaker}:\n${m.text}\n\n`;
+    });
+
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    const safeName = currentChatKey.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    a.download = `chat_${safeName}.txt`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 </script>
 
