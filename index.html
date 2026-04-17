@@ -58,7 +58,6 @@
 
   input[type="file"] { font-size: 0.9rem; color: var(--text-secondary); width: 100%; cursor: pointer; margin-bottom: 15px; }
 
-  /* Global Actions in Sidebar */
   #sidebar-actions {
     display: none;
     padding-top: 15px;
@@ -126,7 +125,6 @@
   }
   
   button:hover { background-color: var(--btn-hover); }
-  
   .btn-danger:hover { background-color: var(--danger); }
 
   #messages { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
@@ -148,8 +146,30 @@
   .msg-user { align-self: flex-end; background-color: var(--msg-user); border-bottom-right-radius: 0; }
   .msg-ai { align-self: flex-start; background-color: var(--msg-ai); border: 1px solid var(--border); border-bottom-left-radius: 0; }
 
-  .time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; text-align: right; display: block; }
-  
+  /* Message Footer (Time & Trash Can) */
+  .msg-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .time { font-size: 0.75rem; color: var(--text-secondary); }
+
+  .delete-msg-btn {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .delete-msg-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
   /* Scrollbar Customization */
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg-color); }
@@ -162,7 +182,7 @@
 <div id="sidebar">
   <div class="header-area">
     <h1>The Archive</h1>
-    <div class="subtitle">Click any message to fix its side!</div>
+    <div class="subtitle">Click a message to switch sides.<br>Click 🗑️ to delete it.</div>
     <input type="file" id="file-input" accept=".json" />
     <div id="sidebar-actions">
       <button class="btn-global" onclick="exportAllChats()">Export Entire Archive (TXT)</button>
@@ -180,7 +200,7 @@
     <div class="btn-group">
       <button id="btn-rename" style="display:none;" onclick="renameCurrentChat()">Rename</button>
       <button id="btn-export" style="display:none;" onclick="exportCurrentChat()">Export 1 Chat</button>
-      <button id="btn-delete" class="btn-danger" style="display:none;" onclick="deleteCurrentChat()">Delete</button>
+      <button id="btn-delete" class="btn-danger" style="display:none;" onclick="deleteCurrentChat()">Delete All</button>
     </div>
   </div>
   <div id="messages"></div>
@@ -262,7 +282,6 @@
       conversations[finalName] = msgs;
     }
     
-    // Show the Export All button now that data is loaded
     document.getElementById('sidebar-actions').style.display = 'block';
     renderContacts();
   }
@@ -289,7 +308,6 @@
       list.appendChild(li);
     });
 
-    // Auto-select first chat or clear view if none left
     if (Object.keys(conversations).length > 0) {
       list.firstChild.click();
     } else {
@@ -312,20 +330,63 @@
     msgContainer.innerHTML = '';
 
     conversations[char].forEach(m => {
+      // 1. Create main message container
       const msgDiv = document.createElement('div');
       msgDiv.className = 'msg ' + (m.isUser ? 'msg-user' : 'msg-ai');
       
+      // 2. Create the text content area
+      const textDiv = document.createElement('div');
+      textDiv.innerHTML = formatText(m.text);
+      
+      // 3. Create the footer (Time + Trash Can)
+      const footerDiv = document.createElement('div');
+      footerDiv.className = 'msg-footer';
+      
       const timeStr = m.time.toLocaleDateString() + ' ' + m.time.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'time';
+      timeSpan.textContent = timeStr;
       
-      msgDiv.innerHTML = formatText(m.text) + `<span class="time">${timeStr}</span>`;
+      const trashSpan = document.createElement('span');
+      trashSpan.className = 'delete-msg-btn';
+      trashSpan.title = "Delete this message";
+      trashSpan.textContent = "🗑️";
       
+      // Setup Individual Message Deletion
+      trashSpan.onclick = function(e) {
+        e.stopPropagation(); // Prevents the block from swapping left/right
+        
+        // Remove from the data array so it doesn't get exported
+        const msgIndex = conversations[char].indexOf(m);
+        if (msgIndex > -1) {
+          conversations[char].splice(msgIndex, 1);
+        }
+        
+        // Remove from the screen smoothly
+        msgDiv.remove();
+      };
+      
+      footerDiv.appendChild(trashSpan);
+      footerDiv.appendChild(timeSpan);
+      
+      msgDiv.appendChild(textDiv);
+      msgDiv.appendChild(footerDiv);
+      
+      // Setup Side Swapping
       msgDiv.onclick = function() {
         m.isUser = !m.isUser;
-        this.className = 'msg ' + (m.isUser ? 'msg-user' : 'msg-ai');
+        if (m.isUser) {
+          this.classList.remove('msg-ai');
+          this.classList.add('msg-user');
+        } else {
+          this.classList.remove('msg-user');
+          this.classList.add('msg-ai');
+        }
       };
 
       msgContainer.appendChild(msgDiv);
     });
+    
     msgContainer.scrollTop = msgContainer.scrollHeight;
   }
 
@@ -343,8 +404,7 @@
 
   function deleteCurrentChat() {
     if (!currentChatKey) return;
-    const confirmDelete = confirm(`Are you sure you want to delete "${currentChatKey}"? This will remove it from your current session (but won't edit your original JSON file).`);
-    
+    const confirmDelete = confirm(`Are you sure you want to delete the entire chat "${currentChatKey}"?`);
     if (confirmDelete) {
       delete conversations[currentChatKey];
       renderContacts();
