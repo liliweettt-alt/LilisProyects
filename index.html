@@ -1,475 +1,903 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Archive - Conversation Reader</title>
-<style>
-  :root {
-    --bg-color: #1e1b18; 
-    --sidebar-bg: #27231f;
-    --chat-bg: #24211d;
-    --text-primary: #d4c8b8;
-    --text-secondary: #a89f91;
-    --accent: #8b6d4b;
-    --msg-user: #43362a;
-    --msg-ai: #2d2925;
-    --border: #3d3630;
-    --btn-bg: #3d3630;
-    --btn-hover: #544b43;
-    --danger: #7a3232;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FicLib Tracker v33</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
-  * { box-sizing: border-box; }
+    <style>
+        :root {
+            --bg-body: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
+            --accent: #818cf8; --accent-glow: rgba(129, 140, 248, 0.2);
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: #f1f5f9; }
+        h1, h2, h3, .font-heading { font-family: 'Poppins', sans-serif; }
+        .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input[type="date"], input[type="month"] { color-scheme: dark; }
 
-  body {
-    margin: 0;
-    font-family: 'Georgia', serif;
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-  }
+        .glass-nav {
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .nav-btn.active { color: #818cf8; }
+        .nav-btn { color: #64748b; }
 
-  #sidebar {
-    width: 320px;
-    background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    min-height: 0; 
-  }
+        .fic-card {
+            background-color: var(--bg-card);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .fic-card:active { transform: scale(0.99); }
 
-  .header-area {
-    padding: 20px;
-    border-bottom: 1px solid var(--border);
-  }
+        .series-folder {
+            background-color: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            position: relative;
+        }
+        .series-folder::before {
+            content: ''; position: absolute; top: -4px; right: 10px; left: 10px; height: 4px;
+            background: rgba(129, 140, 248, 0.2); border-radius: 4px 4px 0 0;
+        }
 
-  h1 {
-    font-size: 1.3rem;
-    margin: 0 0 5px 0;
-    color: var(--accent);
-    font-weight: normal;
-    text-transform: uppercase;
-  }
+        .input-field { 
+            width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box;
+            background-color: var(--bg-input); padding: 0.8rem; 
+            border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.1); 
+            color: white; font-size: 0.9rem; font-family: 'Inter', sans-serif; 
+            transition: all 0.2s; appearance: none; -webkit-appearance: none;
+        }
+        .input-field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
-  .subtitle { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px; font-style: italic; }
+        .filter-dropdown {
+            appearance: none; -webkit-appearance: none;
+            background-color: var(--bg-input); color: white;
+            font-size: 0.75rem; padding-top: 0.5rem; padding-bottom: 0.5rem;
+            padding-left: 0.75rem; padding-right: 2rem;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem;
+            width: auto; white-space: nowrap;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em;
+        }
+        .custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em;
+            padding-right: 2.5rem; -webkit-appearance: none; appearance: none;
+        }
 
-  input[type="file"] { font-size: 0.9rem; color: var(--text-secondary); width: 100%; cursor: pointer; margin-bottom: 15px; }
-
-  #sidebar-actions {
-    display: none;
-    padding-top: 15px;
-    border-top: 1px solid var(--border);
-  }
-
-  .btn-global {
-    width: 100%;
-    background-color: var(--accent);
-    color: var(--bg-color);
-    font-weight: bold;
-    font-size: 1rem;
-    padding: 10px;
-  }
-  .btn-global:hover { background-color: #a3825b; }
-
-  #contact-list { 
-    list-style: none; 
-    padding: 0 0 40px 0; 
-    margin: 0; 
-    overflow-y: auto; 
-    flex: 1; 
-  }
-
-  #contact-list li {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 1.1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  #contact-list li:hover, #contact-list li.active { background-color: var(--msg-user); color: #fff; }
-
-  #chat-area { flex: 1; display: flex; flex-direction: column; background-color: var(--chat-bg); min-height: 0; }
-
-  #chat-header {
-    padding: 15px 30px;
-    border-bottom: 1px solid var(--border);
-    background-color: var(--sidebar-bg);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  #chat-title-area { display: flex; flex-direction: column; }
-  #chat-title { font-size: 1.4rem; color: var(--accent); font-weight: bold; }
-  .hint { font-size: 0.85rem; color: var(--text-secondary); font-style: italic; margin-top: 4px; }
-
-  .btn-group { display: flex; gap: 8px; }
-
-  button {
-    background-color: var(--btn-bg);
-    color: var(--text-primary);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.9rem;
-    transition: background 0.2s;
-  }
-  
-  button:hover { background-color: var(--btn-hover); }
-  .btn-danger:hover { background-color: var(--danger); }
-
-  #messages { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-
-  .msg {
-    max-width: 65%;
-    padding: 14px 18px;
-    border-radius: 8px;
-    line-height: 1.6;
-    font-size: 1.05rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: transform 0.1s;
-  }
-
-  .msg:hover { transform: scale(1.01); box-shadow: 0 0 8px var(--accent); }
-  .msg i { color: var(--text-secondary); }
-
-  .msg-user { align-self: flex-end; background-color: var(--msg-user); border-bottom-right-radius: 0; }
-  .msg-ai { align-self: flex-start; background-color: var(--msg-ai); border: 1px solid var(--border); border-bottom-left-radius: 0; }
-
-  /* Message Footer (Time & Trash Can) */
-  .msg-footer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    margin-top: 8px;
-  }
-
-  .time { font-size: 0.75rem; color: var(--text-secondary); }
-
-  .delete-msg-btn {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    opacity: 0.3;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-
-  .delete-msg-btn:hover {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-
-  /* Scrollbar Customization */
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: var(--bg-color); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-</style>
+        .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: normal; word-break: break-word; text-align: left; line-height: 1.2; height: auto; max-width: 100%; }
+        .tag-chip { font-size: 0.7rem; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; color: #94a3b8; }
+        .cw-chip { font-size: 0.7rem; background: rgba(239, 68, 68, 0.15); padding: 2px 8px; border-radius: 4px; color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); margin-right: 4px; font-weight: 600; }
+        .tab-btn-active { background-color: #334155; color: white; border-color: #818cf8; }
+        .tab-btn-inactive { background-color: transparent; color: #64748b; border-color: transparent; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-<body>
+<body class="antialiased selection:bg-indigo-500 selection:text-white">
 
-<div id="sidebar">
-  <div class="header-area">
-    <h1>The Archive</h1>
-    <div class="subtitle">Click a message to switch sides.<br>Click 🗑️ to delete it.</div>
-    <input type="file" id="file-input" accept=".json" />
-    <div id="sidebar-actions">
-      <button class="btn-global" onclick="exportAllChats()">Export Entire Archive (TXT)</button>
+    <nav class="fixed bottom-0 w-full glass-nav flex justify-between px-6 py-3 z-50 safe-area-pb shadow-[0_-5px_15px_rgba(0,0,0,0.3)]">
+        <button onclick="switchTab('library')" class="nav-btn text-center transition-colors active" id="btn-library">
+            <i class="fa-solid fa-book-open text-lg mb-0.5"></i>
+            <span class="block text-[9px] font-heading tracking-wide">Library</span>
+        </button>
+        <button onclick="switchTab('discovery')" class="nav-btn text-center transition-colors" id="btn-discovery">
+            <i class="fa-solid fa-compass text-lg mb-0.5"></i>
+            <span class="block text-[9px] font-heading tracking-wide">Pick</span>
+        </button>
+        <button onclick="switchTab('dashboard')" class="nav-btn text-center transition-colors" id="btn-dashboard">
+            <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i>
+            <span class="block text-[9px] font-heading tracking-wide">Stats</span>
+        </button>
+        <button onclick="switchTab('report')" class="nav-btn text-center transition-colors" id="btn-report">
+            <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i>
+            <span class="block text-[9px] font-heading tracking-wide">History</span>
+        </button>
+        <button onclick="switchTab('settings')" class="nav-btn text-center transition-colors" id="btn-settings">
+            <i class="fa-solid fa-sliders text-lg mb-0.5"></i>
+            <span class="block text-[9px] font-heading tracking-wide">Data</span>
+        </button>
+    </nav>
+
+    <main class="pb-32 pt-8 px-5 max-w-md mx-auto min-h-screen">
+        <div id="tab-library" class="tab-content">
+            <div class="flex justify-between items-center mb-6">
+                <div><h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">FicLib</h1><p class="text-slate-400 text-xs mt-1">Your reading universe</p></div>
+                <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white w-10 h-10 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center transition-all transform hover:scale-105"><i class="fa-solid fa-plus text-lg"></i></button>
+            </div>
+            <div class="space-y-3 mb-6">
+                <div class="relative"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-500 text-sm"></i><input type="text" id="searchInput" placeholder="Search title, series, tags..." class="input-field pl-9" onkeyup="renderLibrary()"></div>
+                <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    <select id="filterStatus" onchange="renderLibrary()" class="filter-dropdown">
+                        <option value="all">Reading: All</option>
+                        <option value="reading">Currently Reading</option>
+                        <option value="read">Read</option>
+                        <option value="unread">Unread</option>
+                    </select>
+                    <select id="filterCompletion" onchange="renderLibrary()" class="filter-dropdown"><option value="all">Status: All</option><option value="complete">Complete</option><option value="wip">WIP</option></select>
+                    <select id="filterCover" onchange="renderLibrary()" class="filter-dropdown"><option value="all">Cover: All</option><option value="yes">Has Cover</option><option value="not">No Cover</option></select>
+                    <select id="filterFandom" onchange="renderLibrary()" class="filter-dropdown"><option value="all">Fandom: All</option></select>
+                    <select id="filterShips" onchange="renderLibrary()" class="filter-dropdown"><option value="all">Ship: All</option></select>
+                    <select id="filterTags" onchange="renderLibrary()" class="filter-dropdown"><option value="all">Tag: All</option></select>
+                    <select id="filterChapters" onchange="renderLibrary()" class="filter-dropdown"><option value="all">Length: Any</option><option value="short">Short (<10)</option><option value="medium">Medium (10-50)</option><option value="long">Long (>50)</option></select>
+                    <select id="sortOption" onchange="renderLibrary()" class="filter-dropdown"><option value="date">Newest</option><option value="az">A-Z</option><option value="words">Word Count</option></select>
+                </div>
+            </div>
+            <div id="ficList" class="space-y-3"></div>
+        </div>
+
+        <div id="tab-discovery" class="tab-content hidden animate-fade-in">
+            <div class="flex justify-between items-end mb-6">
+                <div><h1 class="text-2xl font-bold text-white">Next Read</h1><p class="text-slate-400 text-xs">Unread gems</p></div>
+                <button onclick="renderDiscovery()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-2"><i class="fa-solid fa-shuffle"></i> Spin</button>
+            </div>
+            <div id="discoveryList" class="space-y-6"></div>
+        </div>
+
+        <div id="tab-dashboard" class="tab-content hidden animate-fade-in">
+            <div class="flex items-center justify-center gap-2 bg-slate-800/50 p-1 rounded-xl mb-6">
+                <button type="button" onclick="switchStatsView('global')" id="btn-stats-global" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all tab-btn-active">All Time</button>
+                <button type="button" onclick="switchStatsView('monthly')" id="btn-stats-monthly" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all tab-btn-inactive">Monthly</button>
+            </div>
+
+            <div id="view-stats-global" class="animate-fade-in">
+                <h1 class="text-2xl font-bold mb-4">Global Overview</h1>
+                
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-center flex flex-col justify-center">
+                        <p class="text-slate-400 text-[9px] uppercase font-bold mb-1">Words</p>
+                        <p class="text-lg font-bold text-white leading-none" id="stat-words">0</p>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-center flex flex-col justify-center">
+                        <p class="text-slate-400 text-[9px] uppercase font-bold mb-1">Unique Fics</p>
+                        <p class="text-lg font-bold text-white leading-none" id="stat-total">0</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-3 rounded-2xl border border-blue-500/30 text-center flex flex-col justify-center">
+                        <p class="text-blue-400 text-[9px] uppercase font-bold mb-1">Active</p>
+                        <p class="text-lg font-bold text-blue-300 leading-none" id="stat-active">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 mb-6">
+                    <div class="flex justify-between text-xs text-slate-400 mb-3 font-semibold"><span id="stat-read-count">Read: 0</span><span id="stat-unread-count">Unread: 0</span></div>
+                    <div class="w-full bg-slate-700 rounded-full h-4 overflow-hidden shadow-inner"><div id="stat-progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-2 text-[9px] font-bold text-white" style="width: 0%">0%</div></div>
+                </div>
+                <div class="space-y-6 mb-8">
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2 text-center">Top Fandoms</h3><div class="h-48 relative"><canvas id="chartFandoms"></canvas></div></div>
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2 text-center">Top Ships</h3><div class="h-48 relative"><canvas id="chartShips"></canvas></div></div>
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2 text-center">Top Tags</h3><div class="h-48 relative"><canvas id="chartTags"></canvas></div></div>
+                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 mt-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wide" id="goalTitleYear">Reading Goal</h3>
+                        <button type="button" onclick="toggleGoalEdit()" class="text-xs text-slate-400 hover:text-white bg-slate-700/50 px-3 py-1 rounded-lg transition-colors"><i class="fa-solid fa-pen"></i> Edit</button>
+                    </div>
+                    <div id="goalDisplay">
+                        <div class="flex justify-between text-xs text-slate-400 mb-1"><span id="goalTextCurrent" class="font-mono text-white">0</span><span id="goalTextTarget" class="font-mono">/ 0</span></div>
+                        <div class="w-full bg-slate-700 rounded-full h-4 overflow-hidden shadow-inner relative"><div id="goalProgressBar" class="bg-gradient-to-r from-emerald-600 to-teal-400 h-4 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-2 text-[9px] font-bold text-slate-900" style="width: 0%">0%</div></div>
+                        <p id="goalMessage" class="text-center text-[10px] text-slate-500 mt-2 italic">Set a goal to start tracking!</p>
+                    </div>
+                    <div id="goalEditor" class="hidden space-y-3 mt-4 border-t border-slate-700 pt-3 animate-fade-in">
+                        <div class="grid grid-cols-2 gap-2"><select id="goalType" class="input-field text-xs p-2 bg-slate-700"><option value="words">Word Count</option><option value="fics">Fics Read</option></select><input type="number" id="goalNumber" placeholder="Target Amount" class="input-field text-xs p-2 bg-slate-700"></div>
+                        <button type="button" onclick="saveGoal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg transition-colors">Save Goal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-stats-monthly" class="hidden animate-fade-in">
+                <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold">Monthly Tracker</h1><input type="month" id="monthPicker" class="input-field w-auto text-xs py-1.5 px-3 bg-slate-800 border-indigo-500/50" onchange="renderMonthlyStats()"></div>
+                <div id="monthly-content">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><p class="text-[10px] text-slate-500 uppercase font-bold">Words this Month</p><p class="text-xl font-bold text-white mt-1" id="month-words">0</p></div>
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><p class="text-[10px] text-slate-500 uppercase font-bold">Fics Finished</p><p class="text-xl font-bold text-white mt-1" id="month-count">0</p></div>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2">Daily Activity</h3><div class="h-48 relative"><canvas id="chartDaily"></canvas></div></div>
+                    <div class="space-y-6">
+                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2">Top Fandoms</h3><div id="month-top-fandoms" class="space-y-2 mt-2"></div></div>
+                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2">Top Ships</h3><div id="month-top-ships" class="space-y-2 mt-2"></div></div>
+                        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2">Top Tags</h3><div id="month-top-tags" class="space-y-2 mt-2"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-report" class="tab-content hidden animate-fade-in">
+            <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold">Reading History</h1><select id="historyYearPicker" class="input-field w-auto text-xs py-1.5 px-3 bg-slate-800 border-indigo-500/50" onchange="updateReport()"></select></div>
+            <div id="history-stats-header" class="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl flex justify-around items-center mb-6 hidden">
+                <div class="text-center"><p class="text-xs text-slate-500 uppercase">Year Total</p><p class="text-xl font-bold text-white" id="hist-year-words">0</p></div><div class="h-8 w-px bg-slate-700"></div><div class="text-center"><p class="text-xs text-slate-500 uppercase">Fics Read</p><p class="text-xl font-bold text-white" id="hist-year-count">0</p></div>
+            </div>
+            <div id="reportContent" class="space-y-6"></div>
+        </div>
+
+        <div id="tab-settings" class="tab-content hidden animate-fade-in">
+            <h1 class="text-2xl font-bold mb-6">Data Management</h1>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-6">
+                <div><h3 class="font-bold mb-3 text-sm text-indigo-300">Reading Preferences</h3><div class="flex items-center justify-between"><label class="text-xs text-slate-400">Reading Speed (WPM)</label><input type="number" id="inpWPM" value="250" onchange="saveWPM()" class="input-field w-20 text-center py-1 bg-slate-700 text-xs"></div><p class="text-[10px] text-slate-500 mt-1">Used to calculate "Time to Read" on fics.</p></div><hr class="border-slate-700">
+                <div><h3 class="font-bold mb-3 text-sm text-indigo-300">Import Library</h3><input type="file" id="fileInput" accept=".json" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"/></div>
+                <div><h3 class="font-bold mb-3 text-sm text-indigo-300">Export Backup</h3><button type="button" onclick="exportData()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Download JSON</button></div>
+                <div class="pt-6 border-t border-slate-700"><button type="button" onclick="clearData()" class="w-full text-red-400 hover:text-red-300 text-sm font-semibold flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i> Delete All Data</button></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="ficModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
+        <div class="bg-slate-800 w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl p-6 h-[90vh] sm:h-auto overflow-y-auto shadow-2xl border border-slate-700/50">
+            <div class="flex justify-between items-center mb-6 sticky top-0 bg-slate-800 z-10 pb-2 border-b border-slate-700">
+                <h2 id="modalTitle" class="text-xl font-bold font-heading text-white">Add Fic</h2>
+                <button type="button" onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="ficForm" class="space-y-4 pb-20">
+                <input type="hidden" id="editId">
+                <input type="text" id="inpTitle" placeholder="Fic Title" class="input-field text-lg font-bold placeholder-slate-500" required>
+                <div class="grid grid-cols-2 gap-3"><input type="text" id="inpAuthor" placeholder="Author" class="input-field"><input type="text" id="inpFandom" placeholder="Fandom" class="input-field"></div>
+                <div class="grid grid-cols-4 gap-3 bg-slate-700/30 p-2 rounded-lg border border-slate-700">
+                    <div class="col-span-3"><input type="text" id="inpSeries" placeholder="Series Name (Optional)" class="input-field text-sm bg-slate-800"></div>
+                    <div class="relative"><span class="absolute right-2 top-3 text-[10px] text-slate-500">Part#</span><input type="number" id="inpSeriesPart" placeholder="1" class="input-field text-sm bg-slate-800"></div>
+                </div>
+                <div class="relative"><i class="fa-solid fa-link absolute left-3 top-3.5 text-slate-500 text-xs"></i><input type="url" id="inpLink" placeholder="AO3 / Wattpad Link" class="input-field pl-8 text-sm"></div>
+                <div class="p-4 bg-slate-700/30 rounded-xl space-y-3 border border-slate-700">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="inpReadStatus" class="input-field custom-select bg-slate-800" onchange="toggleDateVisibility()"><option value="unread">Unread</option><option value="reading">Reading</option><option value="read">Read</option></select>
+                        <select id="inpStatus" class="input-field custom-select bg-slate-800"><option value="wip">WIP</option><option value="complete">Complete</option></select>
+                    </div>
+                    <div id="divDateFinished" class="hidden w-full animate-fade-in space-y-2">
+                        <label class="text-xs text-emerald-400 font-bold ml-1 block">Finished Dates</label>
+                        <div id="dateListContainer" class="space-y-2 mb-2"></div>
+                        <div class="flex gap-2">
+                            <input type="date" id="inpNewDate" class="input-field bg-slate-800 w-full min-w-0 text-xs">
+                            <button type="button" onclick="addFinishDate()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 rounded-lg text-xs font-bold whitespace-nowrap">Add</button>
+                        </div>
+                    </div>
+                    <div id="divReadProgress" class="hidden w-full animate-fade-in">
+                        <label class="text-xs text-blue-400 font-bold ml-1 block">Words Read So Far</label>
+                        <input type="number" id="inpReadProgress" placeholder="0" class="input-field bg-slate-800 text-xs">
+                    </div>
+                    <select id="inpCoverStatus" class="input-field custom-select bg-slate-800"><option value="not">No Cover</option><option value="yes">Cover Made</option></select>
+                </div>
+                <div class="grid grid-cols-2 gap-3"><div class="relative"><span class="absolute right-3 top-3 text-xs text-slate-500">words</span><input type="number" id="inpWords" placeholder="0" class="input-field"></div><div class="relative"><span class="absolute right-3 top-3 text-xs text-slate-500">ch.</span><input type="number" id="inpChapters" placeholder="0" class="input-field"></div></div>
+                <div class="space-y-3">
+                    <div><label class="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wide">Summary</label><textarea id="inpSummary" placeholder="Paste official summary..." rows="3" class="input-field text-sm leading-relaxed text-slate-300"></textarea></div>
+                    <div><label class="text-xs font-bold text-red-400 ml-1 uppercase tracking-wide"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Content Warnings</label><textarea id="inpCW" placeholder="Major Character Death, Violence..." rows="1" class="input-field border-red-500/30 bg-red-500/5 text-sm"></textarea></div>
+                    <div><label class="text-xs font-bold text-indigo-400 ml-1 uppercase tracking-wide"><i class="fa-regular fa-note-sticky mr-1"></i> My Notes</label><textarea id="inpNotes" placeholder="Personal thoughts..." rows="2" class="input-field border-indigo-500/30 bg-indigo-500/5 text-sm"></textarea></div>
+                </div>
+                <div class="space-y-3 pt-2 border-t border-slate-700">
+                    <div><div class="flex justify-between items-center mb-1"><label class="text-xs text-slate-400 ml-1 font-bold">Ships</label><select id="selShipsHelper" class="bg-slate-700 text-[10px] text-indigo-300 border-none rounded px-2 py-1 max-w-[120px] custom-select focus:ring-0" onchange="pickSuggestion('inpShips', 'selShipsHelper')"><option value="">Select used</option></select></div><textarea id="inpShips" placeholder="e.g. Draco/Hermione" rows="1" class="input-field text-sm"></textarea></div>
+                    <div><div class="flex justify-between items-center mb-1"><label class="text-xs text-slate-400 ml-1 font-bold">Tags</label><select id="selTagsHelper" class="bg-slate-700 text-[10px] text-indigo-300 border-none rounded px-2 py-1 max-w-[120px] custom-select focus:ring-0" onchange="pickSuggestion('inpTags', 'selTagsHelper')"><option value="">Select used</option></select></div><textarea id="inpTags" placeholder="e.g. Slow Burn, AU" rows="1" class="input-field text-sm"></textarea></div>
+                </div>
+                <div class="flex gap-3 mt-6 pt-4 border-t border-slate-700">
+                    <button type="button" id="btnDelete" onclick="deleteFic()" class="hidden bg-red-500/10 hover:bg-red-500/20 text-red-400 p-3 rounded-xl font-bold w-1/4 transition-colors border border-red-500/20"><i class="fa-solid fa-trash"></i></button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white p-3 rounded-xl font-bold flex-1 shadow-lg shadow-indigo-500/25 transition-all transform active:scale-95">Save Fic</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
-  <ul id="contact-list"></ul>
-</div>
 
-<div id="chat-area">
-  <div id="chat-header">
-    <div id="chat-title-area">
-      <span id="chat-title">Select a conversation</span>
-      <span class="hint">Click a message to switch who sent it</span>
-    </div>
-    <div class="btn-group">
-      <button id="btn-rename" style="display:none;" onclick="renameCurrentChat()">Rename</button>
-      <button id="btn-export" style="display:none;" onclick="exportCurrentChat()">Export 1 Chat</button>
-      <button id="btn-delete" class="btn-danger" style="display:none;" onclick="deleteCurrentChat()">Delete All</button>
-    </div>
-  </div>
-  <div id="messages"></div>
-</div>
+    <script>
+        let fics = [];
+        let readingGoal = { type: 'words', amount: 0 };
+        let chartInstances = { fandoms: null, ships: null, tags: null, daily: null };
+        let tempDates = [];
 
-<script>
-  let conversations = {};
-  let currentChatKey = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem('ficLibData');
+            const storedGoal = localStorage.getItem('ficLibGoal');
+            const storedWPM = localStorage.getItem('ficLibWPM');
+            if(storedWPM) document.getElementById('inpWPM').value = storedWPM;
 
-  document.getElementById('file-input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const data = JSON.parse(e.target.result);
-        processData(data);
-      } catch (err) {
-        alert("Error reading JSON file. Make sure it is formatted correctly.");
-      }
-    };
-    reader.readAsText(file);
-  });
-
-  function processData(data) {
-    let mapped = [];
-    data.forEach(item => {
-      if (item.src && item.tgt && item.text) {
-        mapped.push({
-          id: "old_" + item.tgt,
-          name: item.tgt + " (Old Archive)",
-          text: item.text,
-          time: new Date(item.created || item.create_time),
-          isUser: true 
-        });
-      } else if (item.chat_id && item.raw_content) {
-        mapped.push({
-          id: item.chat_id,
-          text: item.raw_content,
-          time: new Date(item.create_time)
-        });
-      }
-    });
-
-    let groups = {};
-    mapped.forEach(m => {
-      if (!groups[m.id]) groups[m.id] = [];
-      groups[m.id].push(m);
-    });
-
-    conversations = {};
-    for (let id in groups) {
-      let msgs = groups[id];
-      msgs.sort((a, b) => a.time - b.time);
-      
-      let name = msgs[0].name; 
-      if (!name) name = "Unknown Chat (" + id.substring(0, 4) + ")";
-
-      let currentUser = true;
-      msgs.forEach((m, i) => {
-        if (m.isUser !== undefined) return; 
-        let t = m.text;
-        if (t.includes("*She ") || t.includes("*I ") || t.startsWith("AJ:") || t.startsWith("Elizabeth:")) {
-          currentUser = true;
-        } else if (t.includes("*He ")) {
-          currentUser = false;
-        } else {
-          if (i > 0) currentUser = !msgs[i-1].isUser;
-        }
-        m.isUser = currentUser;
-      });
-
-      let finalName = name;
-      let counter = 2;
-      while (conversations[finalName]) {
-        finalName = name + " (Chat " + counter + ")";
-        counter++;
-      }
-      conversations[finalName] = msgs;
-    }
-    
-    document.getElementById('sidebar-actions').style.display = 'block';
-    renderContacts();
-  }
-
-  function formatText(text) {
-    const div = document.createElement('div');
-    div.innerText = text; 
-    return div.innerHTML.replace(/\*([^*]+)\*/g, '<i>*$1*</i>').replace(/\n/g, '<br>');
-  }
-
-  function renderContacts() {
-    const list = document.getElementById('contact-list');
-    list.innerHTML = '';
-    
-    Object.keys(conversations).forEach(char => {
-      const li = document.createElement('li');
-      li.textContent = char;
-      li.onclick = () => {
-        document.querySelectorAll('#contact-list li').forEach(el => el.classList.remove('active'));
-        li.classList.add('active');
-        currentChatKey = char;
-        renderMessages(char);
-      };
-      list.appendChild(li);
-    });
-
-    if (Object.keys(conversations).length > 0) {
-      list.firstChild.click();
-    } else {
-      currentChatKey = null;
-      document.getElementById('chat-title').textContent = "No conversations left";
-      document.getElementById('messages').innerHTML = '';
-      document.getElementById('btn-rename').style.display = 'none';
-      document.getElementById('btn-export').style.display = 'none';
-      document.getElementById('btn-delete').style.display = 'none';
-    }
-  }
-
-  function renderMessages(char) {
-    document.getElementById('chat-title').textContent = char;
-    document.getElementById('btn-rename').style.display = 'block';
-    document.getElementById('btn-export').style.display = 'block';
-    document.getElementById('btn-delete').style.display = 'block';
-    
-    const msgContainer = document.getElementById('messages');
-    msgContainer.innerHTML = '';
-
-    conversations[char].forEach(m => {
-      // 1. Create main message container
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'msg ' + (m.isUser ? 'msg-user' : 'msg-ai');
-      
-      // 2. Create the text content area
-      const textDiv = document.createElement('div');
-      textDiv.innerHTML = formatText(m.text);
-      
-      // 3. Create the footer (Time + Trash Can)
-      const footerDiv = document.createElement('div');
-      footerDiv.className = 'msg-footer';
-      
-      const timeStr = m.time.toLocaleDateString() + ' ' + m.time.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'time';
-      timeSpan.textContent = timeStr;
-      
-      const trashSpan = document.createElement('span');
-      trashSpan.className = 'delete-msg-btn';
-      trashSpan.title = "Delete this message";
-      trashSpan.textContent = "🗑️";
-      
-      // Setup Individual Message Deletion
-      trashSpan.onclick = function(e) {
-        e.stopPropagation(); // Prevents the block from swapping left/right
+            if (stored) {
+                try {
+                    fics = JSON.parse(stored);
+                    fics.forEach(f => {
+                        if(f.cover_status) { f.coverStatus = f.cover_status; delete f.cover_status; }
+                        if(f.reread_status) { f.rereadStatus = f.reread_status; delete f.reread_status; }
+                        if(f.date_finished) { f.dateFinished = f.date_finished; delete f.date_finished; }
+                        if(!f.finishedDates) f.finishedDates = f.dateFinished ? [f.dateFinished] : [];
+                    });
+                } catch(e) { console.error("Data load error", e); fics = []; }
+                renderLibrary();
+                updateReport();
+            }
+            
+            if (storedGoal) { 
+                try { 
+                    const parsed = JSON.parse(storedGoal); 
+                    if(parsed && typeof parsed === 'object') readingGoal = parsed;
+                } catch(e) { console.error("Goal load error", e); } 
+            }
+            
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            document.getElementById('ficForm').addEventListener('submit', handleFormSubmit);
+            document.getElementById('goalTitleYear').innerText = `${new Date().getFullYear()} Reading Goal`;
+            document.getElementById('monthPicker').value = new Date().toISOString().slice(0, 7);
         
-        // Remove from the data array so it doesn't get exported
-        const msgIndex = conversations[char].indexOf(m);
-        if (msgIndex > -1) {
-          conversations[char].splice(msgIndex, 1);
+            switchStatsView('global');
+        });
+
+        function parseDateLocal(input) { if(!input) return null; if(typeof input==='number') return new Date((input+978307200)*1000); if(typeof input==='string' && input.includes('-') && input.length===10) { const [y,m,d]=input.split('-').map(Number); return new Date(y,m-1,d); } return new Date(input); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('active', 'text-indigo-400'); el.classList.add('text-slate-500'); });
+            const activeBtn = document.getElementById(`btn-${tab}`);
+            activeBtn.classList.remove('text-slate-500'); activeBtn.classList.add('active', 'text-indigo-400');
+            
+            if(tab === 'dashboard') {
+                switchStatsView('global'); 
+            }
+            if(tab === 'report') updateReport();
+            if(tab === 'discovery') renderDiscovery();
+            window.scrollTo(0,0);
         }
         
-        // Remove from the screen smoothly
-        msgDiv.remove();
-      };
-      
-      footerDiv.appendChild(trashSpan);
-      footerDiv.appendChild(timeSpan);
-      
-      msgDiv.appendChild(textDiv);
-      msgDiv.appendChild(footerDiv);
-      
-      // Setup Side Swapping
-      msgDiv.onclick = function() {
-        m.isUser = !m.isUser;
-        if (m.isUser) {
-          this.classList.remove('msg-ai');
-          this.classList.add('msg-user');
-        } else {
-          this.classList.remove('msg-user');
-          this.classList.add('msg-ai');
+        function saveData() { 
+            localStorage.setItem('ficLibData', JSON.stringify(fics)); 
+            renderLibrary(); 
+            updateReport(); 
+            if(!document.getElementById('tab-dashboard').classList.contains('hidden')) {
+                if(!document.getElementById('view-stats-global').classList.contains('hidden')) {
+                    updateDashboard();
+                } else {
+                    renderMonthlyStats();
+                }
+            }
         }
-      };
+        
+        function saveWPM() { localStorage.setItem('ficLibWPM', document.getElementById('inpWPM').value); renderLibrary(); }
 
-      msgContainer.appendChild(msgDiv);
-    });
-    
-    msgContainer.scrollTop = msgContainer.scrollHeight;
-  }
+        function switchStatsView(view) {
+            document.getElementById('view-stats-global').classList.toggle('hidden', view !== 'global');
+            document.getElementById('view-stats-monthly').classList.toggle('hidden', view !== 'monthly');
+            const btnGlobal = document.getElementById('btn-stats-global');
+            const btnMonthly = document.getElementById('btn-stats-monthly');
+            
+            if(view === 'global') {
+                btnGlobal.classList.add('tab-btn-active'); btnGlobal.classList.remove('tab-btn-inactive');
+                btnMonthly.classList.remove('tab-btn-active'); btnMonthly.classList.add('tab-btn-inactive');
+                updateDashboard();
+            } else {
+                btnMonthly.classList.add('tab-btn-active'); btnMonthly.classList.remove('tab-btn-inactive');
+                btnGlobal.classList.remove('tab-btn-active'); btnGlobal.classList.add('tab-btn-inactive');
+                renderMonthlyStats();
+            }
+        }
+        function populateFilterDropdowns() {
+            const shipSet = new Set(), tagSet = new Set(), fandomSet = new Set();
+            fics.forEach(f => { 
+                if(f.fandom) fandomSet.add(f.fandom.trim());
+                (f.ships || []).forEach(s => shipSet.add(s.trim())); 
+                (f.tags || []).forEach(t => tagSet.add(t.trim())); 
+            });
+            const fill = (id, items, label) => {
+                const select = document.getElementById(id);
+                const currentVal = select.value;
+                select.innerHTML = `<option value="all">${label}</option>`;
+                items.sort((a,b) => a.localeCompare(b)).forEach(i => { if(i) { const opt = document.createElement('option'); opt.value = i; opt.innerText = i; select.appendChild(opt); }});
+                if(items.includes(currentVal)) select.value = currentVal;
+            };
+            fill('filterFandom', Array.from(fandomSet), 'Fandom: All');
+            fill('filterShips', Array.from(shipSet), 'Ship: All'); 
+            fill('filterTags', Array.from(tagSet), 'Tag: All');
+        }
 
-  function renameCurrentChat() {
-    if (!currentChatKey) return;
-    const newName = prompt("Enter a new name for this conversation:", currentChatKey);
-    if (newName && newName !== currentChatKey && newName.trim() !== "") {
-      conversations[newName] = conversations[currentChatKey];
-      delete conversations[currentChatKey];
-      currentChatKey = newName;
-      renderContacts();
-      Array.from(document.querySelectorAll('#contact-list li')).find(li => li.textContent === newName).click();
-    }
-  }
+        function populateHelperDropdowns() {
+            const shipSet = new Set();
+            const tagSet = new Set();
+            
+            fics.forEach(f => { 
+                (f.ships || []).forEach(s => shipSet.add(s.trim())); 
+                (f.tags || []).forEach(t => tagSet.add(t.trim())); 
+            });
+            
+            const fillSelect = (id, items) => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                
+                select.innerHTML = '<option value="">Select used</option>';
+                items.sort((a,b) => a.localeCompare(b)).forEach(item => { 
+                    if(item) { 
+                        const opt = document.createElement('option'); 
+                        opt.value = item; 
+                        opt.innerText = item; 
+                        select.appendChild(opt); 
+                    }
+                });
+            };
+            
+            fillSelect('selShipsHelper', Array.from(shipSet));
+            fillSelect('selTagsHelper', Array.from(tagSet));
+        }
 
-  function deleteCurrentChat() {
-    if (!currentChatKey) return;
-    const confirmDelete = confirm(`Are you sure you want to delete the entire chat "${currentChatKey}"?`);
-    if (confirmDelete) {
-      delete conversations[currentChatKey];
-      renderContacts();
-    }
-  }
+        function pickSuggestion(targetInputId, selectDropdownId) {
+            const select = document.getElementById(selectDropdownId);
+            const target = document.getElementById(targetInputId);
+            const selectedValue = select.value;
+            
+            if (selectedValue) {
+                let currentText = target.value.trim();
+                if (currentText && !currentText.endsWith(',')) {
+                    currentText += ', ';
+                }
+                target.value = currentText + selectedValue;
+            }
+            select.value = ''; 
+        }
 
-  function exportCurrentChat() {
-    if (!currentChatKey) return;
-    const msgs = conversations[currentChatKey];
-    
-    let textContent = `Conversation: ${currentChatKey}\nExported on: ${new Date().toLocaleString()}\n`;
-    textContent += `========================================================\n\n`;
+        function renderLibrary() {
+            populateFilterDropdowns();
+            const list = document.getElementById('ficList');
+            list.innerHTML = '';
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const completionFilter = document.getElementById('filterCompletion').value;
+            const coverFilter = document.getElementById('filterCover').value;
+            const fandomFilter = document.getElementById('filterFandom').value;
+            const shipFilter = document.getElementById('filterShips').value;
+            const tagFilter = document.getElementById('filterTags').value;
+            const chapterFilter = document.getElementById('filterChapters').value;
+            const sortMode = document.getElementById('sortOption').value;
 
-    msgs.forEach(m => {
-      const speaker = m.isUser ? "You" : currentChatKey.replace(/ \(.*?\)/g, "");
-      textContent += `${speaker}:\n${m.text}\n\n`;
-    });
+            try {
+                let filtered = fics.filter(f => {
+                    if (statusFilter !== 'all' && (f.rereadStatus || 'unread').toLowerCase() !== statusFilter) return false;
+                    if (completionFilter !== 'all' && (f.status || 'wip').toLowerCase() !== completionFilter) return false;
+                    if (coverFilter !== 'all') { const hasCover = (f.coverStatus === 'yes'); if (coverFilter === 'yes' && !hasCover) return false; if (coverFilter === 'not' && hasCover) return false; }
+                    if (fandomFilter !== 'all' && (!f.fandom || f.fandom.trim() !== fandomFilter)) return false;
+                    if (shipFilter !== 'all' && (!f.ships || !f.ships.includes(shipFilter))) return false;
+                    if (tagFilter !== 'all' && (!f.tags || !f.tags.includes(tagFilter))) return false;
+                    const chaps = f.chapters || 0;
+                    if (chapterFilter === 'short' && chaps >= 10) return false; if (chapterFilter === 'medium' && (chaps < 10 || chaps > 50)) return false; if (chapterFilter === 'long' && chaps <= 50) return false;
+                    if (search) { const txt = `${f.title} ${f.series || ''} ${f.fandom} ${f.author} ${(f.ships||[]).join(' ')} ${(f.tags||[]).join(' ')}`.toLowerCase(); return txt.includes(search); }
+                    return true;
+                });
 
-    const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    
-    const safeName = currentChatKey.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    a.download = `chat_${safeName}.txt`;
-    
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+                const groups = {};
+                const displayList = [];
+                filtered.forEach(f => { if(f.series && f.series.trim() !== "") { const sName = f.series.trim(); if(!groups[sName]) groups[sName] = []; groups[sName].push(f); } else { displayList.push({ type: 'fic', data: f }); } });
+                
+                Object.keys(groups).forEach(seriesName => {
+                    const seriesFics = groups[seriesName];
+                    seriesFics.sort((a,b) => (a.seriesPart || 0) - (b.seriesPart || 0));
+                    const dates = seriesFics.map(f => {
+                        const lastDate = f.finishedDates && f.finishedDates.length ? f.finishedDates[f.finishedDates.length-1] : null; 
+                        const d = parseDateLocal(lastDate); return d ? d.getTime() : 0; 
+                    });
+                    displayList.push({ type: 'series', title: seriesName, fandom: seriesFics[0].fandom, author: seriesFics[0].author, totalWords: seriesFics.reduce((sum, f) => sum + (f.wordcount||0), 0), items: seriesFics, latestTimestamp: Math.max(...dates) });
+                });
 
-  function exportAllChats() {
-    if (Object.keys(conversations).length === 0) {
-      alert("There are no conversations to export!");
-      return;
-    }
+                displayList.sort((a, b) => {
+                    const getTs = (item) => { 
+                        if(item.type === 'series') return item.latestTimestamp || 0;
+                        const lastDate = item.data.finishedDates && item.data.finishedDates.length ? item.data.finishedDates[item.data.finishedDates.length-1] : null;
+                        const d = parseDateLocal(lastDate); return d ? d.getTime() : 0; 
+                    };
+                    const getWords = (item) => item.type === 'series' ? item.totalWords : (item.data.wordcount||0);
+                    const getTitle = (item) => item.type === 'series' ? item.title : item.data.title;
+                    if (sortMode === 'az') return getTitle(a).localeCompare(getTitle(b)); if (sortMode === 'words') return getWords(b) - getWords(a); return getTs(b) - getTs(a); 
+                });
 
-    let textContent = `COMPLETE CHAT ARCHIVE\nExported on: ${new Date().toLocaleString()}\n`;
-    textContent += `========================================================\n\n`;
+                if(displayList.length === 0) list.innerHTML = `<div class="text-center text-slate-500 py-10">No fics found.</div>`;
+                displayList.forEach(item => { if (item.type === 'fic') renderFicCard(item.data, list); else renderSeriesCard(item, list); });
+            } catch(err) { console.error(err); list.innerHTML = `<div class="text-red-400 text-center py-5">Error rendering list. Check console.</div>`; }
+        }
 
-    for (let chatName in conversations) {
-      textContent += `--- CONVERSATION: ${chatName} ---\n\n`;
-      
-      conversations[chatName].forEach(m => {
-        const speaker = m.isUser ? "You" : chatName.replace(/ \(.*?\)/g, "");
-        textContent += `${speaker}:\n${m.text}\n\n`;
-      });
-      
-      textContent += `========================================================\n\n`;
-    }
+        function calculateTime(words) { if(!words) return ""; const wpm = parseInt(localStorage.getItem('ficLibWPM')) || 250; const min = Math.ceil(words / wpm); const h = Math.floor(min / 60); const m = min % 60; return h > 0 ? `${h}h ${m}m` : `${m}min`; }
 
-    const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    
-    a.download = `Complete_Chat_Archive.txt`;
-    
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-</script>
+        function renderFicCard(f, container) {
+            const isRead = f.rereadStatus === 'read';
+            const isReading = f.rereadStatus === 'reading';
+            const isComplete = (f.status || 'wip').toLowerCase() === 'complete';
+            
+            const statusBadge = isComplete ? '<span class="badge bg-emerald-900/30 text-emerald-400 border border-emerald-500/30">Complete</span>' : '<span class="badge bg-amber-900/30 text-amber-400 border border-amber-500/30">WIP</span>';
+            const coverBadge = f.coverStatus === 'yes' ? '<span class="badge bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"><i class="fa-solid fa-image mr-1"></i> Cover</span>' : '';
+            
+            let readBadge = '';
+            if (isRead) readBadge = '<span class="text-emerald-400 text-xs flex items-center gap-1"><i class="fa-solid fa-check"></i> Read</span>';
+            if (isReading) readBadge = '<span class="text-blue-400 text-xs flex items-center gap-1"><i class="fa-solid fa-book-open-reader"></i> Reading</span>';
 
+            const seriesHtml = (f.series && f.series.trim() !== "") ? `<div class="text-[10px] text-indigo-300 font-bold mb-0.5 tracking-wide"><i class="fa-solid fa-layer-group mr-1"></i>Part ${f.seriesPart}</div>` : '';
+            const cwHtml = (f.cws || []).map(c => `<span class="cw-chip" title="Content Warning">${c}</span>`).join('');
+            const shipHtml = (f.ships || []).length > 0 ? `<span class="text-indigo-400 text-xs font-bold mr-2"><i class="fa-solid fa-heart mr-1"></i>${f.ships[0]}</span>` : '';
+            const readTime = calculateTime(f.wordcount);
+            
+            const hasSummary = f.summary && f.summary.trim() !== "";
+            const hasNotes = f.notes && f.notes.trim() !== "";
+            const hasTags = (f.tags || []).length > 0;
+            const toggleId = `toggle-${f.id}`;
+            const showToggle = hasSummary || hasNotes || hasTags;
+            const toggleBtn = showToggle ? `<button type="button" onclick="event.stopPropagation(); document.getElementById('${toggleId}').classList.toggle('hidden')" class="text-slate-500 hover:text-white transition-colors p-1"><i class="fa-solid fa-chevron-down"></i></button>` : '';
+
+            const tagsBlock = hasTags ? `<div class="flex flex-wrap gap-2 mb-3 pt-2">${(f.tags||[]).map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div>` : '';
+            const summaryBlock = hasSummary ? `<div class="text-sm text-slate-300 italic leading-relaxed mb-3">${f.summary}</div>` : '';
+            const notesBlock = hasNotes ? `<div class="bg-indigo-900/20 border border-indigo-500/30 p-3 rounded-lg text-xs text-indigo-200"><strong class="block text-indigo-400 mb-1 uppercase tracking-wide">My Notes</strong>${f.notes}</div>` : '';
+
+            const item = document.createElement('div');
+            item.className = 'fic-card p-4 rounded-xl relative group mb-3';
+            item.onclick = (e) => { if(!e.target.closest('button')) openEditModal(f.id); };
+            item.innerHTML = `
+                <div class="flex justify-between">
+                    <div class="flex-1 min-w-0 pr-3">
+                        <div class="flex items-start justify-between"><span class="badge bg-slate-700 text-slate-300 border border-slate-600 mr-2 mb-1">${f.fandom || 'No Fandom'}</span></div>
+                        ${seriesHtml}
+                        <h3 class="font-bold text-lg text-white truncate leading-tight mt-0.5 mb-0.5">${f.title}</h3>
+                        <p class="text-xs text-slate-400 mb-2 truncate">${f.author || 'Unknown'}</p>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">${statusBadge} ${coverBadge} ${readBadge}</div>
+                        <div class="mt-2 flex flex-wrap gap-y-1">${cwHtml} ${shipHtml}</div>
+                    </div>
+                    <div class="flex flex-col items-end justify-between pl-2 min-w-[75px] border-l border-slate-700/50 my-1">
+                        <div class="flex flex-col items-end gap-2">${f.originalLink ? `<button type="button" onclick="event.stopPropagation(); window.open('${f.originalLink}', '_blank')" class="text-indigo-400 hover:text-white bg-indigo-500/10 hover:bg-indigo-500 p-1.5 rounded-lg"><i class="fa-solid fa-up-right-from-square text-xs"></i></button>` : ''} ${toggleBtn}</div>
+                        <div class="text-[10px] text-slate-500 text-right font-mono mt-auto"><span class="block text-white font-bold">${readTime}</span><span class="block">${(f.wordcount||0).toLocaleString()}w</span>${f.chapters ? `<span class="block">${f.chapters} ch</span>` : ''}</div>
+                    </div>
+                </div>
+                <div id="${toggleId}" class="hidden mt-2 border-t border-slate-700/50 animate-fade-in">${tagsBlock}${summaryBlock}${notesBlock}</div>`;
+            container.appendChild(item);
+        }
+
+        function renderSeriesCard(series, container) {
+            const div = document.createElement('div'); div.className = 'series-folder rounded-xl mb-3 cursor-pointer overflow-hidden';
+            div.onclick = function(e) { if(e.target.closest('.fic-card')) return; const content = this.querySelector('.series-content'); const icon = this.querySelector('.chevron-icon'); content.classList.toggle('hidden'); icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)'; };
+            div.innerHTML = `<div class="p-4 flex justify-between items-center bg-slate-800/80 backdrop-blur-sm z-10 relative"><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="badge bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Series</span><span class="text-[10px] text-slate-400 uppercase font-bold">${series.fandom}</span></div><h3 class="font-bold text-lg text-white leading-tight">${series.title}</h3><p class="text-xs text-slate-400 mt-1">${series.items.length} Works • ${series.totalWords.toLocaleString()} words</p></div><div class="pl-4 text-slate-500"><i class="fa-solid fa-chevron-down chevron-icon transition-transform duration-300"></i></div></div><div class="series-content hidden bg-slate-900/50 p-3 space-y-2 border-t border-slate-700/50 animate-fade-in"></div>`;
+            const contentBox = div.querySelector('.series-content'); series.items.forEach(f => renderFicCard(f, contentBox)); container.appendChild(div);
+        }
+
+        function renderDiscovery() {
+            const container = document.getElementById('discoveryList');
+            const unread = fics.filter(f => {
+                const s = f.rereadStatus || 'unread';
+                return s !== 'read' && s !== 'reading';
+            });
+            if (unread.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-10">All fics read!</div>'; return; }
+            container.innerHTML = '';
+            const shuffled = [...unread].sort(() => 0.5 - Math.random()).slice(0, 5);
+            shuffled.forEach(f => {
+                const card = document.createElement('div'); card.className = 'fic-card p-5 rounded-xl border border-indigo-500/20 shadow-lg';
+                const cwHtml = (f.cws || []).map(c => `<span class="cw-chip">${c}</span>`).join('');
+                card.innerHTML = `<div class="flex justify-between items-start mb-2"><div><span class="badge bg-slate-700 text-slate-300 border border-slate-600 mb-1">${f.fandom}</span><h3 class="text-xl font-bold text-white leading-tight mt-1">${f.title}</h3><p class="text-sm text-slate-400">by ${f.author}</p></div></div><div class="flex flex-wrap gap-2 mb-3">${cwHtml} ${(f.ships||[]).map(s=>`<span class="text-indigo-300 text-xs font-bold mr-2">${s}</span>`).join('')}${(f.tags||[]).slice(0,5).map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div><div class="bg-slate-900/50 p-3 rounded-lg text-sm text-slate-300 italic mb-3 border-l-2 border-slate-600">${f.summary || 'No summary.'}</div><div class="flex justify-between items-center pt-2 border-t border-slate-700/50"><span class="text-xs text-slate-500 font-mono">${(f.wordcount||0).toLocaleString()} words • ${calculateTime(f.wordcount)}</span><button type="button" onclick="openEditModal('${f.id}')" class="text-xs text-slate-500 hover:text-white">Details</button></div>`;
+                container.appendChild(card);
+            });
+        }
+        function updateDashboard() {
+            const readFics = fics.filter(f => f.rereadStatus === 'read');
+            const readingFics = fics.filter(f => f.rereadStatus === 'reading');
+            
+            let totalReadWords = 0;
+            readFics.forEach(f => {
+                const readCount = (f.finishedDates && f.finishedDates.length > 0) ? f.finishedDates.length : 1; 
+                totalReadWords += (f.wordcount || 0) * readCount;
+            });
+            readingFics.forEach(f => {
+                totalReadWords += (f.readProgress || 0);
+            });
+
+            document.getElementById('stat-total').innerText = fics.length; 
+            document.getElementById('stat-words').innerText = totalReadWords.toLocaleString();
+            document.getElementById('stat-active').innerText = readingFics.length;
+            
+            document.getElementById('stat-read-count').innerText = `Read: ${readFics.length}`;
+            document.getElementById('stat-unread-count').innerText = `Unread: ${fics.length - readFics.length}`;
+            const pct = fics.length ? Math.round((readFics.length / fics.length) * 100) : 0;
+            const bar = document.getElementById('stat-progress-bar'); bar.style.width = `${pct}%`; bar.innerText = `${pct}%`;
+
+            renderPieChart('chartFandoms', readFics, f => f.fandom, 'fandoms');
+            renderPieChart('chartShips', readFics, f => f.ships, 'ships');
+            renderPieChart('chartTags', readFics, f => f.tags, 'tags'); 
+            updateGoalUI();
+        }
+
+        function renderMonthlyStats() {
+            const pickerVal = document.getElementById('monthPicker').value;
+            if(!pickerVal) return;
+            const [year, month] = pickerVal.split('-').map(Number);
+            const now = new Date();
+            const isCurrentMonth = (year === now.getFullYear() && month === (now.getMonth() + 1));
+            
+            const monthFics = [];
+            let wordsInMonth = 0;
+            
+            fics.forEach(f => {
+                if(f.rereadStatus === 'read' && f.finishedDates) {
+                    f.finishedDates.forEach(dateStr => {
+                        const d = parseDateLocal(dateStr);
+                        if(d && d.getFullYear() === year && (d.getMonth() + 1) === month) {
+                            monthFics.push(f);
+                            wordsInMonth += (f.wordcount || 0);
+                        }
+                    });
+                }
+            });
+
+            if(isCurrentMonth) {
+                fics.filter(f => f.rereadStatus === 'reading').forEach(f => {
+                    wordsInMonth += (f.readProgress || 0);
+                });
+            }
+
+            document.getElementById('month-words').innerText = wordsInMonth.toLocaleString();
+            document.getElementById('month-count').innerText = monthFics.length;
+
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+            const data = new Array(daysInMonth).fill(0);
+            
+            fics.forEach(f => {
+                if(!f.finishedDates) return;
+                f.finishedDates.forEach(dateStr => {
+                    const d = parseDateLocal(dateStr);
+                    if(d && d.getFullYear() === year && (d.getMonth() + 1) === month) {
+                        data[d.getDate() - 1] += (f.wordcount || 0);
+                    }
+                });
+            });
+
+            const ctx = document.getElementById('chartDaily').getContext('2d');
+            if(chartInstances.daily) chartInstances.daily.destroy();
+            chartInstances.daily = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Words', data: data, backgroundColor: '#818cf8', borderRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } }, y: { border: { display: false }, grid: { color: '#334155' }, ticks: { color: '#64748b', font: { size: 9 } } } } } });
+
+            const renderList = (id, keyFn) => {
+                const counts = {};
+                monthFics.forEach(f => { const keys = keyFn(f); (Array.isArray(keys)?keys:[keys]).forEach(k => { if(k) counts[k] = (counts[k] || 0) + 1; }); });
+                const top = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+                document.getElementById(id).innerHTML = top.map(([k,v]) => `<div class="flex justify-between text-xs py-1 border-b border-slate-700/50 last:border-0"><span class="text-slate-300 truncate w-2/3">${k}</span><span class="text-indigo-400 font-bold">${v}</span></div>`).join('') || '<p class="text-xs text-slate-500 italic">No data</p>';
+            };
+            renderList('month-top-fandoms', f => f.fandom);
+            renderList('month-top-ships', f => f.ships);
+            renderList('month-top-tags', f => f.tags);
+        }
+        function renderPieChart(canvasId, list, keyFn, instanceName) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            if (chartInstances[instanceName]) chartInstances[instanceName].destroy();
+
+            const counts = {};
+            list.forEach(f => { const keys = keyFn(f); if (Array.isArray(keys)) keys.forEach(k => counts[k] = (counts[k] || 0) + 1); else if (keys) counts[keys] = (counts[keys] || 0) + 1; });
+            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            if (sorted.length === 0) {
+                chartInstances[instanceName] = new Chart(ctx, { 
+                    type: 'doughnut', 
+                    data: { labels: ['No Data'], datasets: [{ data: [1], backgroundColor: ['#334155'], borderColor: '#1e293b', borderWidth: 2 }] }, 
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } } 
+                });
+                return;
+            }
+
+            const labels = sorted.map(x => x[0]); 
+            const data = sorted.map(x => x[1]);
+            const colors = ['#818cf8', '#a78bfa', '#c084fc', '#6366f1', '#94a3b8'];
+            
+            chartInstances[instanceName] = new Chart(ctx, { 
+                type: 'doughnut', 
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: '#1e293b', borderWidth: 2 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 10, family: 'Inter' }, boxWidth: 10 } } } } 
+            });
+        }
+        function toggleGoalEdit() { 
+            try {
+                const editor = document.getElementById('goalEditor'); 
+                if (!editor) return;
+                
+                const isHidden = editor.classList.contains('hidden');
+                
+                if (isHidden) {
+                    editor.classList.remove('hidden'); 
+                    document.getElementById('goalType').value = (readingGoal && readingGoal.type) ? readingGoal.type : 'words'; 
+                    document.getElementById('goalNumber').value = (readingGoal && readingGoal.amount > 0) ? readingGoal.amount : ''; 
+                } else {
+                    editor.classList.add('hidden');
+                }
+            } catch (e) { console.error("Error opening edit goal:", e); }
+        }
+        
+        function saveGoal() { 
+            try {
+                const type = document.getElementById('goalType').value || 'words'; 
+                const amount = parseInt(document.getElementById('goalNumber').value); 
+                
+                if(amount > 0) { 
+                    readingGoal = { type: type, amount: amount }; 
+                    localStorage.setItem('ficLibGoal', JSON.stringify(readingGoal)); 
+                    toggleGoalEdit(); 
+                    updateGoalUI(); 
+                } else { 
+                    alert("Please enter a valid number greater than 0."); 
+                } 
+            } catch (e) { console.error("Error saving goal:", e); }
+        }
+        
+        function updateGoalUI() {
+            const currentYear = new Date().getFullYear();
+            let finishedThisYearCount = 0;
+            let finishedThisYearWords = 0;
+
+            fics.forEach(f => {
+                if(f.rereadStatus === 'read' && f.finishedDates) {
+                    f.finishedDates.forEach(dateStr => {
+                        const d = parseDateLocal(dateStr);
+                        if(d && d.getFullYear() === currentYear) {
+                            finishedThisYearCount++;
+                            finishedThisYearWords += (f.wordcount || 0);
+                        }
+                    });
+                }
+            });
+
+            fics.filter(f => f.rereadStatus === 'reading').forEach(f => {
+                finishedThisYearWords += (f.readProgress || 0);
+            });
+
+            const safeType = (readingGoal && readingGoal.type) ? readingGoal.type : 'words';
+            const target = (readingGoal && readingGoal.amount > 0) ? readingGoal.amount : 1; 
+            
+            let currentVal = (safeType === 'words') ? finishedThisYearWords : finishedThisYearCount;
+            let pct = Math.round((currentVal / target) * 100); if(pct > 100) pct = 100;
+            
+            document.getElementById('goalTextCurrent').innerText = currentVal.toLocaleString();
+            document.getElementById('goalTextTarget').innerText = `/ ${target.toLocaleString()} ${safeType}`;
+            document.getElementById('goalProgressBar').style.width = `${pct}%`; document.getElementById('goalProgressBar').innerText = `${pct}%`;
+            
+            const msg = document.getElementById('goalMessage');
+            if(currentVal >= target && target > 1) { msg.innerText = "Goal Reached! Amazing!"; msg.className = "text-center text-[10px] text-emerald-400 mt-2 font-bold"; } else { msg.innerText = `Tracking ${safeType} for ${currentYear}`; msg.className = "text-center text-[10px] text-slate-500 mt-2 italic"; }
+        }
+        function updateReport() {
+            const container = document.getElementById('reportContent');
+            const picker = document.getElementById('historyYearPicker');
+            const statsHeader = document.getElementById('history-stats-header');
+
+            const allReads = [];
+            fics.forEach(f => {
+                if(f.rereadStatus === 'read' && f.finishedDates) {
+                    f.finishedDates.forEach(dateStr => {
+                        const d = parseDateLocal(dateStr);
+                        if(d) allReads.push({ ...f, dateObj: d });
+                    });
+                }
+            });
+
+            if (allReads.length === 0) { 
+                container.innerHTML = '<div class="text-center text-slate-600 py-10">No finished dates logged</div>';
+                picker.style.display = 'none'; statsHeader.style.display = 'none'; return;
+            }
+
+            const years = [...new Set(allReads.map(r => r.dateObj.getFullYear()))].sort((a,b) => b-a);
+            
+            if(picker.children.length === 0) {
+                years.forEach(y => { const opt = document.createElement('option'); opt.value = y; opt.innerText = y; picker.appendChild(opt); });
+                picker.value = years[0];
+            }
+            picker.style.display = 'block'; statsHeader.style.display = 'flex';
+
+            const selectedYear = parseInt(picker.value);
+            const yearReads = allReads.filter(r => r.dateObj.getFullYear() === selectedYear);
+
+            const yearWords = yearReads.reduce((s,f) => s + (f.wordcount || 0), 0);
+            document.getElementById('hist-year-words').innerText = yearWords.toLocaleString();
+            document.getElementById('hist-year-count').innerText = yearReads.length;
+
+            const groups = {};
+            yearReads.forEach(f => { const m = f.dateObj.getMonth(); if(!groups[m]) groups[m]=[]; groups[m].push(f); });
+            
+            container.innerHTML = '';
+            Object.keys(groups).sort((a,b)=>b-a).forEach(m => {
+                const monthName = new Date(selectedYear, m).toLocaleString('default', { month: 'long' });
+                const mDiv = document.createElement('div'); 
+                mDiv.className = 'bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden mb-4';
+                mDiv.innerHTML = `<div class="bg-slate-700/50 px-5 py-3 font-bold flex justify-between"><span class="text-indigo-300 font-heading">${monthName}</span><span class="badge bg-slate-600 text-white">${groups[m].length}</span></div><div class="p-3 space-y-2"></div>`;
+                const contentBox = mDiv.querySelector('div:last-child');
+                
+                groups[m].sort((a,b)=>b.dateObj-a.dateObj).forEach(f => {
+                    contentBox.innerHTML += `<div class="flex justify-between items-center text-sm py-2 px-2 hover:bg-slate-700/30 rounded-lg"><span class="truncate w-3/4 font-medium text-slate-300">${f.title}</span><span class="text-slate-500 text-xs font-mono">${f.dateObj.getDate()}</span></div>`;
+                });
+                container.appendChild(mDiv);
+            });
+        }
+        function renderDateList() {
+            const container = document.getElementById('dateListContainer');
+            container.innerHTML = '';
+            tempDates.sort().reverse().forEach((d, index) => {
+                const chip = document.createElement('div');
+                chip.className = "flex justify-between items-center bg-slate-900/50 px-3 py-1.5 rounded-lg text-xs border border-slate-700";
+                chip.innerHTML = `<span class="font-mono text-indigo-300">${d}</span><button type="button" onclick="removeDate(${index})" class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>`;
+                container.appendChild(chip);
+            });
+        }
+
+        function addFinishDate() {
+            const input = document.getElementById('inpNewDate');
+            if(input.value) {
+                tempDates.push(input.value);
+                tempDates.sort();
+                renderDateList();
+                input.value = '';
+            }
+        }
+
+        function removeDate(index) {
+            tempDates.splice(index, 1);
+            renderDateList();
+        }
+
+        function toggleDateVisibility() { 
+            const s=document.getElementById('inpReadStatus').value; 
+            document.getElementById('divDateFinished').classList.toggle('hidden', s !== 'read');
+            document.getElementById('divReadProgress').classList.toggle('hidden', s !== 'reading');
+        }
+
+        function openEditModal(id) {
+            const f=fics.find(x=>x.id===id); if(!f)return;
+            document.getElementById('editId').value=f.id; document.getElementById('modalTitle').innerText='Edit Fic';
+            
+            ['inpTitle','inpAuthor','inpFandom','inpStatus','inpSummary','inpNotes'].forEach(k=>document.getElementById(k).value=f[k.replace('inp','').toLowerCase()]||'');
+            document.getElementById('inpLink').value = f.originalLink || '';
+            document.getElementById('inpWords').value = f.wordcount || '';
+            document.getElementById('inpChapters').value = f.chapters || '';
+            document.getElementById('inpReadStatus').value=f.rereadStatus||'unread'; document.getElementById('inpCoverStatus').value=f.coverStatus||'not';
+            document.getElementById('inpSeries').value=f.series||''; document.getElementById('inpSeriesPart').value=f.seriesPart||'';
+            document.getElementById('inpShips').value=(f.ships||[]).join(', '); document.getElementById('inpTags').value=(f.tags||[]).join(', ');
+            document.getElementById('inpCW').value=(f.cws||[]).join(', ');
+            
+            document.getElementById('inpReadProgress').value = f.readProgress || '';
+
+            tempDates = f.finishedDates ? [...f.finishedDates] : [];
+            renderDateList();
+
+            populateHelperDropdowns();
+
+            document.getElementById('btnDelete').classList.remove('hidden'); toggleDateVisibility(); document.getElementById('ficModal').classList.remove('hidden');
+        }
+
+        function openAddModal() { 
+            document.getElementById('ficForm').reset(); 
+            document.getElementById('editId').value=''; 
+            document.getElementById('modalTitle').innerText='Add New Fic'; 
+            document.getElementById('btnDelete').classList.add('hidden'); 
+            
+            tempDates = [];
+            renderDateList();
+            
+            toggleDateVisibility(); 
+
+            populateHelperDropdowns();
+
+            document.getElementById('ficModal').classList.remove('hidden'); 
+        }
+
+        function closeModal() { document.getElementById('ficModal').classList.add('hidden'); }
+        function deleteFic() { if(confirm("Delete this fic?")) { fics=fics.filter(f=>f.id!==document.getElementById('editId').value); saveData(); closeModal(); } }
+        
+        function handleFormSubmit(e) {
+            e.preventDefault(); const id=document.getElementById('editId').value;
+            const sortedDates = [...tempDates].sort();
+            const latestDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
+
+            const obj = {
+                id: id||crypto.randomUUID(), title: document.getElementById('inpTitle').value, author: document.getElementById('inpAuthor').value, fandom: document.getElementById('inpFandom').value,
+                originalLink: document.getElementById('inpLink').value, rereadStatus: document.getElementById('inpReadStatus').value, coverStatus: document.getElementById('inpCoverStatus').value,
+                status: document.getElementById('inpStatus').value, wordcount: parseInt(document.getElementById('inpWords').value)||0, chapters: parseInt(document.getElementById('inpChapters').value)||0,
+                summary: document.getElementById('inpSummary').value, notes: document.getElementById('inpNotes').value,
+                ships: document.getElementById('inpShips').value.split(',').map(s=>s.trim()).filter(s=>s), tags: document.getElementById('inpTags').value.split(',').map(s=>s.trim()).filter(s=>s),
+                cws: document.getElementById('inpCW').value.split(',').map(s=>s.trim()).filter(s=>s),
+                readProgress: parseInt(document.getElementById('inpReadProgress').value) || 0,
+                finishedDates: [...tempDates],
+                dateFinished: latestDate,
+                series: document.getElementById('inpSeries').value.trim(), seriesPart: parseInt(document.getElementById('inpSeriesPart').value)||0
+            };
+            if(id) { const idx=fics.findIndex(x=>x.id===id); fics[idx]={...fics[idx], ...obj}; } else fics.unshift(obj);
+            saveData(); closeModal();
+        }
+        function handleFileUpload(e) { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=(ev)=>{ try{ const j=JSON.parse(ev.target.result); fics=Array.isArray(j)?j:(j.fics||[]); saveData(); alert(`Loaded ${fics.length} fics.`); switchTab('library'); }catch(err){alert("Invalid backup.");} }; r.readAsText(f); }
+        function exportData() { const a=document.createElement('a'); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify({database_version:"1.0",fics:fics},null,2)); a.download="ficlib_backup.json"; document.body.appendChild(a); a.click(); a.remove(); }
+        function clearData() { if(confirm("Delete ALL data?")) { fics=[]; saveData(); switchTab('library'); } }
+    </script>
 </body>
 </html>
