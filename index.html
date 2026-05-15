@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FicLib Tracker v34</title>
+    <title>FicLib Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -47,7 +47,6 @@
             </div>
             <div class="space-y-3 mb-6">
                 <div class="relative"><i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-500 text-sm"></i>
-      
                     <input type="text" id="searchInput" placeholder="Search title, series, tags..." class="input-field pl-9" onkeyup="handleSearch()">
                 </div>
                 <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
@@ -94,17 +93,17 @@
                 <h1 class="text-2xl font-bold mb-4">Global Overview</h1>
                 
                 <div class="grid grid-cols-3 gap-3 mb-4">
-                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-center flex flex-col justify-center">
-                        <p class="text-slate-400 text-[9px] uppercase font-bold mb-1">Words</p>
-                        <p class="text-lg font-bold text-white leading-none" id="stat-words">0</p>
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-center flex flex-col justify-center min-w-0">
+                        <p class="text-slate-400 text-[9px] uppercase font-bold mb-1 truncate">Words</p>
+                        <p class="text-sm sm:text-lg tracking-tighter font-bold text-white leading-none truncate" id="stat-words">0</p>
                     </div>
-                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-center flex flex-col justify-center">
-                        <p class="text-slate-400 text-[9px] uppercase font-bold mb-1">Unique Fics</p>
-                        <p class="text-lg font-bold text-white leading-none" id="stat-total">0</p>
+                    <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-center flex flex-col justify-center min-w-0">
+                        <p class="text-slate-400 text-[9px] uppercase font-bold mb-1 truncate">Unique Fics</p>
+                        <p class="text-sm sm:text-lg tracking-tighter font-bold text-white leading-none truncate" id="stat-total">0</p>
                     </div>
-                    <div class="bg-slate-900/50 p-3 rounded-2xl border border-blue-500/30 text-center flex flex-col justify-center">
-                        <p class="text-blue-400 text-[9px] uppercase font-bold mb-1">Active</p>
-                        <p class="text-lg font-bold text-blue-300 leading-none" id="stat-active">0</p>
+                    <div class="bg-slate-900/50 p-3 rounded-2xl border border-blue-500/30 text-center flex flex-col justify-center min-w-0">
+                        <p class="text-blue-400 text-[9px] uppercase font-bold mb-1 truncate">Active</p>
+                        <p class="text-sm sm:text-lg tracking-tighter font-bold text-blue-300 leading-none truncate" id="stat-active">0</p>
                     </div>
                 </div>
 
@@ -138,8 +137,8 @@
                 <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold">Monthly Tracker</h1><input type="month" id="monthPicker" class="input-field w-auto text-xs py-1.5 px-3 bg-slate-800 border-indigo-500/50" onchange="renderMonthlyStats()"></div>
                 <div id="monthly-content">
                     <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><p class="text-[10px] text-slate-500 uppercase font-bold">Words this Month</p><p class="text-xl font-bold text-white mt-1" id="month-words">0</p></div>
-                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><p class="text-[10px] text-slate-500 uppercase font-bold">Fics Finished</p><p class="text-xl font-bold text-white mt-1" id="month-count">0</p></div>
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><p class="text-[10px] text-slate-500 uppercase font-bold">Words this Month</p><p class="text-xl font-bold text-white mt-1 truncate tracking-tighter" id="month-words">0</p></div>
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><p class="text-[10px] text-slate-500 uppercase font-bold">Fics Finished</p><p class="text-xl font-bold text-white mt-1 truncate tracking-tighter" id="month-count">0</p></div>
                     </div>
                     <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6"><h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wide border-b border-slate-700 pb-2">Daily Activity</h3><div class="h-48 relative"><canvas id="chartDaily"></canvas></div></div>
                     <div class="space-y-6">
@@ -154,7 +153,7 @@
         <div id="tab-report" class="tab-content hidden animate-fade-in">
             <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold">Reading History</h1><select id="historyYearPicker" class="input-field w-auto text-xs py-1.5 px-3 bg-slate-800 border-indigo-500/50" onchange="updateReport()"></select></div>
             <div id="history-stats-header" class="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl flex justify-around items-center mb-6 hidden">
-                <div class="text-center"><p class="text-xs text-slate-500 uppercase">Year Total</p><p class="text-xl font-bold text-white" id="hist-year-words">0</p></div><div class="h-8 w-px bg-slate-700"></div><div class="text-center"><p class="text-xs text-slate-500 uppercase">Fics Read</p><p class="text-xl font-bold text-white" id="hist-year-count">0</p></div>
+                <div class="text-center min-w-0"><p class="text-xs text-slate-500 uppercase truncate">Year Total</p><p class="text-xl tracking-tighter font-bold text-white truncate" id="hist-year-words">0</p></div><div class="h-8 w-px bg-slate-700"></div><div class="text-center min-w-0"><p class="text-xs text-slate-500 uppercase truncate">Fics Read</p><p class="text-xl tracking-tighter font-bold text-white truncate" id="hist-year-count">0</p></div>
             </div>
             <div id="reportContent" class="space-y-6"></div>
         </div>
@@ -171,12 +170,13 @@
     </main>
 
     <div id="ficModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
-        <div class="bg-slate-800 w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl p-6 h-[90vh] sm:h-auto overflow-y-auto shadow-2xl border border-slate-700/50 flex flex-col relative">
+        <div class="bg-slate-800 w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl p-6 h-[90vh] sm:h-auto sm:max-h-[90vh] shadow-2xl border border-slate-700/50 flex flex-col relative overscroll-contain">
             <div class="flex justify-between items-center mb-6 sticky top-0 bg-slate-800 z-20 pb-2 border-b border-slate-700 pt-2">
                 <h2 id="modalTitle" class="text-xl font-bold font-heading text-white">Add Fic</h2>
                 <button type="button" onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form id="ficForm" class="space-y-4 flex-1 overflow-y-auto no-scrollbar pb-6">
+            
+            <form id="ficForm" class="space-y-4 flex-1 overflow-y-auto no-scrollbar pb-6 overscroll-contain">
                 <input type="hidden" id="editId">
                 <input type="text" id="inpTitle" placeholder="Fic Title" class="input-field text-lg font-bold placeholder-slate-500" required>
                 <div class="grid grid-cols-2 gap-3"><input type="text" id="inpAuthor" placeholder="Author" class="input-field"><input type="text" id="inpFandom" placeholder="Fandom" class="input-field"></div>
@@ -214,7 +214,6 @@
                     <div><div class="flex justify-between items-center mb-1"><label class="text-xs text-slate-400 ml-1 font-bold">Ships</label><select id="selShipsHelper" class="bg-slate-700 text-[10px] text-indigo-300 border-none rounded px-2 py-1 max-w-[120px] custom-select focus:ring-0" onchange="pickSuggestion('inpShips', 'selShipsHelper')"><option value="">Select used</option></select></div><textarea id="inpShips" placeholder="e.g. Draco/Hermione" rows="1" class="input-field text-sm"></textarea></div>
                     <div><div class="flex justify-between items-center mb-1"><label class="text-xs text-slate-400 ml-1 font-bold">Tags</label><select id="selTagsHelper" class="bg-slate-700 text-[10px] text-indigo-300 border-none rounded px-2 py-1 max-w-[120px] custom-select focus:ring-0" onchange="pickSuggestion('inpTags', 'selTagsHelper')"><option value="">Select used</option></select></div><textarea id="inpTags" placeholder="e.g. Slow Burn, AU" rows="1" class="input-field text-sm"></textarea></div>
                 </div>
-                
                 
                 <div class="sticky bottom-0 bg-slate-800/95 backdrop-blur-md pt-4 pb-2 border-t border-slate-700 z-20 flex gap-3 mt-6 -mx-6 px-6">
                     <button type="button" id="btnDelete" onclick="deleteFic()" class="hidden bg-red-500/10 hover:bg-red-500/20 text-red-400 p-3 rounded-xl font-bold w-1/4 transition-colors border border-red-500/20"><i class="fa-solid fa-trash"></i></button>
