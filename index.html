@@ -7,17 +7,17 @@
     <meta name="referrer" content="no-referrer">
     <meta name="theme-color" content="#0e1416">
     <title>BookLib</title>
-
+ 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-
+ 
     <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
-
+ 
     <div id="errorBanner" class="error-banner hidden" role="alert"></div>
     <script>
         // Shows a plain message on screen if something goes wrong, instead of a blank page
@@ -38,11 +38,12 @@
                 showProblem('<b>A file did not load:</b> ' + src.split('/').slice(-2).join('/') + '<br>Check that the <code>css</code> and <code>js</code> folders sit next to <code>index.html</code>.', true);
                 return;
             }
-            if (!e.message || e.message === 'Script error.') {
-                showProblem('<b>Something went wrong,</b> but the browser is hiding the details (a browser extension or a file opened straight from your computer can cause this).');
-                return;
-            }
-            showProblem('<b>Something went wrong:</b> ' + e.message + ' (' + String(e.filename || '').split('/').pop() + ':' + e.lineno + ')', true);
+            // Only report errors that come from this app's own files.
+            // Browsers and extensions (Brave's wallet, password managers...) inject their own
+            // scripts into every page; their errors are not ours and are ignored.
+            var file = String(e.filename || '');
+            if (file.indexOf('/js/') === -1 && file.indexOf('index.html') === -1) return;
+            showProblem('<b>Something went wrong:</b> ' + e.message + ' (' + file.split('/').pop() + ':' + e.lineno + ')', true);
         }, true);
         window.addEventListener('load', function () {
             if (typeof switchTab === 'undefined' || typeof renderLibrary === 'undefined') {
@@ -50,7 +51,7 @@
             }
         });
     </script>
-
+ 
     <nav class="nav" aria-label="Main">
         <button class="nav-btn active" id="btn-library" onclick="switchTab('library')">
             <i class="fa-solid fa-book"></i><span>Library</span>
@@ -68,9 +69,9 @@
             <i class="fa-solid fa-sliders"></i><span>Config</span>
         </button>
     </nav>
-
+ 
     <main class="app">
-
+ 
         <!-- ================= LIBRARY ================= -->
         <section id="tab-library" class="tab-content">
             <header class="page-head">
@@ -80,7 +81,7 @@
                 </div>
                 <button class="fab" onclick="openAddModal()" aria-label="Add a book"><i class="fa-solid fa-plus"></i></button>
             </header>
-
+ 
             <div class="filters">
                 <div class="search">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -114,10 +115,10 @@
                     </select>
                 </div>
             </div>
-
+ 
             <div id="bookList"></div>
         </section>
-
+ 
         <!-- ================= UP NEXT ================= -->
         <section id="tab-upnext" class="tab-content hidden">
             <header class="page-head">
@@ -127,7 +128,7 @@
                 </div>
             </header>
             <div id="queueList"></div>
-
+ 
             <h2 class="section-title">Can't decide?</h2>
             <p class="page-sub">Three random picks from your to-read pile.</p>
             <div class="pick-row">
@@ -141,13 +142,13 @@
             </div>
             <div id="discoveryList"></div>
         </section>
-
+ 
         <!-- ================= STATS ================= -->
         <section id="tab-dashboard" class="tab-content hidden">
             <header class="page-head">
                 <div><h1 class="page-title">Stats</h1></div>
             </header>
-
+ 
             <div class="goal-card">
                 <div class="goal-head">
                     <div>
@@ -159,7 +160,7 @@
                 <div class="goal-track"><div id="goalBar" class="goal-fill" style="width:0%"></div></div>
                 <p class="goal-count"><b id="goalCount">0</b> of <span id="goalTotal">20</span></p>
             </div>
-
+ 
             <div class="tiles">
                 <div class="tile"><b id="stat-total">0</b><span>Books owned</span></div>
                 <div class="tile"><b id="stat-physical">0</b><span>Physical</span></div>
@@ -170,12 +171,12 @@
                 <div class="tile"><b id="stat-avg">–</b><span>Average rating</span></div>
                 <div class="tile"><b id="stat-streak">0</b><span>Month streak</span></div>
             </div>
-
+ 
             <div class="panel">
                 <h3>Highest rated</h3>
                 <ol id="topRatedList" class="top-list"></ol>
             </div>
-
+ 
             <div class="panel">
                 <h3>Where your library stands</h3>
                 <div class="chart-box"><canvas id="chartStatus"></canvas></div>
@@ -189,7 +190,7 @@
                 <div class="chart-box"><canvas id="chartTags"></canvas></div>
             </div>
         </section>
-
+ 
         <!-- ================= LOG ================= -->
         <section id="tab-report" class="tab-content hidden">
             <header class="page-head">
@@ -200,13 +201,13 @@
             </header>
             <div id="reportContent"></div>
         </section>
-
+ 
         <!-- ================= CONFIG ================= -->
         <section id="tab-settings" class="tab-content hidden">
             <header class="page-head">
                 <div><h1 class="page-title">Config</h1></div>
             </header>
-
+ 
             <div class="panel">
                 <h3>Backup</h3>
                 <p class="note">Your books live only in this browser. Nothing is sent anywhere. Browsers can clear their storage, so download a backup now and then.</p>
@@ -217,7 +218,7 @@
                     <button class="btn btn-soft" onclick="document.getElementById('fileInput').click()"><i class="fa-solid fa-upload"></i> Restore from backup</button>
                 </div>
             </div>
-
+ 
             <div class="panel">
                 <h3>Look</h3>
                 <label class="label" for="themeSelector">Colour theme</label>
@@ -227,14 +228,14 @@
                     <option value="walnut">Walnut</option>
                 </select>
             </div>
-
+ 
             <div class="panel">
                 <h3>Danger zone</h3>
                 <button class="btn btn-danger" onclick="clearData()"><i class="fa-solid fa-trash"></i> Delete everything in this app</button>
             </div>
         </section>
     </main>
-
+ 
     <!-- ================= ADD / EDIT SHEET ================= -->
     <div id="bookModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="sheet">
@@ -242,20 +243,20 @@
                 <h2 id="modalTitle">Add a book</h2>
                 <button type="button" class="icon-plain" onclick="closeModal()" aria-label="Close"><i class="fa-solid fa-chevron-down"></i></button>
             </div>
-
+ 
             <form id="bookForm">
                 <input type="hidden" id="editId">
-
+ 
                 <div class="fld">
                     <label class="label" for="inpTitle">Title</label>
                     <input type="text" id="inpTitle" class="field" required autocomplete="off">
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpAuthor">Author</label>
                     <input type="text" id="inpAuthor" class="field" autocomplete="off">
                 </div>
-
+ 
                 <div class="two">
                     <div class="fld">
                         <label class="label" for="inpSeries">Series</label>
@@ -266,7 +267,7 @@
                         <input type="number" id="inpSeriesPart" class="field" min="0" step="0.5" inputmode="decimal" placeholder="1">
                     </div>
                 </div>
-
+ 
                 <div class="fld">
                     <span class="label">I own it as</span>
                     <div class="format-chips" id="formatChips">
@@ -275,7 +276,7 @@
                         <button type="button" class="fmt" data-format="audiobook"><i class="fa-solid fa-headphones"></i> Audiobook</button>
                     </div>
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpProgress">Status</label>
                     <select id="inpProgress" class="field" onchange="toggleDateUI()">
@@ -286,7 +287,7 @@
                         <option value="DNF">Did not finish</option>
                     </select>
                 </div>
-
+ 
                 <div class="two">
                     <div class="fld">
                         <label class="label" for="inpCurrentPage">Current page</label>
@@ -297,7 +298,7 @@
                         <input type="number" id="inpPages" class="field" min="0" inputmode="numeric" placeholder="0">
                     </div>
                 </div>
-
+ 
                 <div class="fld">
                     <span class="label">Rating <small>(tap the same star again to clear)</small></span>
                     <div class="stars" id="starContainer">
@@ -309,7 +310,7 @@
                     </div>
                     <input type="hidden" id="inpRating" value="0">
                 </div>
-
+ 
                 <div id="dateSection" class="fld dates hidden">
                     <span class="label">Finish dates</span>
                     <p class="note">Add a date so this read counts toward your yearly goal and shows in the Log. Pick a day, or leave the box empty and tap Add for today. Add one per re-read.</p>
@@ -319,7 +320,7 @@
                         <button type="button" class="btn btn-accent small" onclick="addDate()">Add</button>
                     </div>
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpCover">Cover image link</label>
                     <div class="cover-input">
@@ -327,28 +328,28 @@
                         <div id="coverPreview" class="cover-preview"></div>
                     </div>
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpIsbn">ISBN <small>(optional, finds a cover automatically)</small></label>
                     <input type="text" id="inpIsbn" class="field" inputmode="numeric" placeholder="9780000000000" autocomplete="off">
                     <p class="note">Only used if the cover link above is empty. The cover is then fetched from openlibrary.org, which will see the ISBN. Leave blank to avoid that.</p>
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpLink">Link</label>
                     <input type="text" id="inpLink" class="field" placeholder="https://… (Goodreads, store, anything)" autocomplete="off">
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpSummary">Summary</label>
                     <textarea id="inpSummary" class="field" rows="3" placeholder="What is it about?"></textarea>
                 </div>
-
+ 
                 <div class="fld">
                     <label class="label" for="inpNotes">My notes</label>
                     <textarea id="inpNotes" class="field notes" rows="3" placeholder="Thoughts, favourite moments, where you bought it…"></textarea>
                 </div>
-
+ 
                 <div class="fld">
                     <div class="label-row">
                         <label class="label" for="inpTags">Tags</label>
@@ -358,7 +359,7 @@
                     </div>
                     <textarea id="inpTags" class="field" rows="2" placeholder="Fantasy, Romance, Historical…"></textarea>
                 </div>
-
+ 
                 <div class="form-actions">
                     <button type="button" id="btnDelete" class="btn btn-danger-soft hidden" onclick="deleteBook()" aria-label="Delete this book"><i class="fa-solid fa-trash"></i></button>
                     <button type="submit" id="btnSubmitModal" class="btn btn-accent grow">Add to library</button>
@@ -366,7 +367,7 @@
             </form>
         </div>
     </div>
-
+ 
     <script src="js/state.js?v=3"></script>
     <script src="js/utils.js?v=3"></script>
     <script src="js/library.js?v=3"></script>
