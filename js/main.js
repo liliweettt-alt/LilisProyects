@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hook up the buttons FIRST, so they keep working even if something below fails
     step('connecting the file picker', () => $('fileInput').addEventListener('change', handleFileUpload));
     step('connecting the add sheet', initModal);
+    step('connecting bulk edit', initBulk);
+    step('connecting auto-fill', initAutofill);
 
     step('loading the theme', () => {
         const theme = storeGet(STORAGE.theme) || 'ink';
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function switchTab(tab) {
+    if (tab !== 'library' && selectMode) exitSelectMode(false);
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     $(`tab-${tab}`).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -52,7 +55,7 @@ function switchTab(tab) {
         if (tab === 'upnext') { renderQueue(); if (discoveryIds.length === 0) shuffleDiscovery(); else renderDiscovery(); }
         if (tab === 'dashboard') updateStats();
         if (tab === 'report') updateReport();
-        if (tab === 'settings') showLastBackup();
+        if (tab === 'settings') { showLastBackup(); renderAutofillPanel(); }
     });
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -68,5 +71,6 @@ function refreshActiveTab() {
         if (tab === 'upnext') { renderQueue(); renderDiscovery(); }
         if (tab === 'dashboard') updateStats();
         if (tab === 'report') updateReport();
+        if (tab === 'settings') renderAutofillPanel();
     });
 }

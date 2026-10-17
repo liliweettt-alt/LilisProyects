@@ -372,3 +372,54 @@ textarea.field { resize: vertical; line-height: 1.5; }
     font-size: 0.85rem; line-height: 1.5;
 }
 .error-banner code { background: rgba(255,255,255,0.15); padding: 0 4px; border-radius: 4px; }
+
+/* ---------- select mode / bulk edit ---------- */
+.head-actions { display: flex; align-items: center; gap: 14px; }
+.text-btn { color: var(--accent); font-weight: 700; font-size: 0.9rem; padding: 10px 4px; }
+.book-row { position: relative; }
+.sel-check {
+    position: absolute; left: 5px; top: 5px; z-index: 3;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); border: 2px solid rgba(255,255,255,0.7);
+    display: flex; align-items: center; justify-content: center; color: transparent; font-size: 0.7rem;
+}
+.book.selected .sel-check { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.book.selected { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.book.selecting .pin, .book.selecting .round-btn { display: none; }
+.book.selecting .book-row { cursor: pointer; }
+
+.series-headrow { display: flex; align-items: stretch; background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border-left: 3px solid var(--accent); }
+.series-head { background: none; border-left: 0; flex: 1; width: auto; }
+.series-pick { padding: 0 16px; color: var(--accent); font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+
+.bulk-bar {
+    position: fixed; left: 0; right: 0; z-index: 60; margin: 0 auto; max-width: 30rem;
+    bottom: calc(66px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px 14px 0 0;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.35);
+}
+.bulk-bar span { flex: 1; font-size: 0.85rem; font-weight: 700; }
+.bar-btn { padding: 0.5rem 0.8rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; background: var(--surface); color: var(--muted); }
+.bar-btn.primary { background: var(--accent); color: var(--on-accent); }
+body.select-mode .app { padding-bottom: calc(190px + env(safe-area-inset-bottom)); }
+.sheet.short { height: auto; max-height: 90vh; max-height: 90dvh; }
+
+.toast {
+    position: fixed; left: 50%; transform: translateX(-50%); z-index: 300;
+    bottom: calc(86px + env(safe-area-inset-bottom)); max-width: 88vw;
+    background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 999px;
+    font-size: 0.85rem; font-weight: 700; text-align: center;
+}
+
+/* ---------- auto-fill panel ---------- */
+.check-row { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 12px 0 6px; }
+.check-row label { display: flex; align-items: center; gap: 7px; font-size: 0.88rem; color: var(--text); }
+.check-row input { accent-color: var(--accent); width: 18px; height: 18px; }
+.af-bar { height: 8px; margin: 10px 0 6px; }
+.undo-row { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+#afReview details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+#afReview summary { cursor: pointer; font-weight: 700; font-size: 0.88rem; }
+#afReview ul { list-style: none; padding: 0; margin: 8px 0 0; max-height: 260px; overflow-y: auto; }
+#afReview li button { display: block; width: 100%; text-align: left; padding: 8px 2px; font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid var(--line); }
+#afReview li button b { color: var(--text); font-weight: 500; }

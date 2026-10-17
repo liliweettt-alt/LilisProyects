@@ -48,6 +48,11 @@ function openLink(link) {
 function buildBook(b, inFolder) {
     const card = document.createElement('article');
     card.className = 'book';
+    card.dataset.id = b.id;
+    if (selectMode) {
+        card.classList.add('selecting');
+        if (selectedIds.has(b.id)) card.classList.add('selected');
+    }
 
     const stateHtml = `<span class="state state-${b.progress.toLowerCase()}">${PROGRESS_LABELS[b.progress]}</span>`;
 
@@ -101,6 +106,7 @@ function buildBook(b, inFolder) {
 
     card.innerHTML = `
         <div class="book-row">
+            ${selectMode ? '<span class="sel-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' : ''}
             ${coverHtml(b)}
             <div class="book-body">
                 <div class="book-top">
@@ -120,7 +126,9 @@ function buildBook(b, inFolder) {
         ${panelHtml}`;
 
     wireCovers(card);
-    card.querySelector('.book-row').addEventListener('click', () => openEditModal(b.id));
+    card.querySelector('.book-row').addEventListener('click', () => {
+        if (selectMode) toggleSelected(b.id); else openEditModal(b.id);
+    });
     card.querySelector('.pin').addEventListener('click', e => { e.stopPropagation(); togglePin(b.id); });
     const qb = card.querySelector('.queue-btn');
     if (qb) qb.addEventListener('click', e => { e.stopPropagation(); toggleQueue(b.id); });
@@ -141,12 +149,22 @@ function buildSeriesFolder(group) {
     const open = !collapsedSeries.has(group.key);
 
     wrap.innerHTML = `
-        <button class="series-head" aria-expanded="${open}">
-            <span class="series-name">${escapeHtml(group.name)}</span>
-            <span class="series-count">${group.books.length} books · ${readCount} read</span>
-            <i class="fa-solid fa-chevron-down"></i>
-        </button>
+        <div class="series-headrow">
+            <button class="series-head" aria-expanded="${open}">
+                <span class="series-name">${escapeHtml(group.name)}</span>
+                <span class="series-count">${group.books.length} books · ${readCount} read</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            ${selectMode ? '<button class="series-pick">Select all</button>' : ''}
+        </div>
         <div class="series-body" ${open ? '' : 'hidden'}></div>`;
+
+    const pick = wrap.querySelector('.series-pick');
+    if (pick) pick.addEventListener('click', () => {
+        const allOn = group.books.every(b => selectedIds.has(b.id));
+        group.books.forEach(b => { if (allOn) selectedIds.delete(b.id); else selectedIds.add(b.id); });
+        refreshSelectionUI();
+    });
 
     const body = wrap.querySelector('.series-body');
     group.books.forEach(b => body.appendChild(safeBuild(b, true)));

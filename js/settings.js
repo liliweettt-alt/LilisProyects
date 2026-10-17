@@ -77,7 +77,7 @@ function clearData() {
     queueIds = [];
     discoveryIds = [];
     readingGoal = 20;
-    [STORAGE.data, STORAGE.queue, STORAGE.goal].forEach(storeRemove);
+    [STORAGE.data, STORAGE.queue, STORAGE.goal, STORAGE.undo].forEach(storeRemove);
     switchTab('library');
 }
 

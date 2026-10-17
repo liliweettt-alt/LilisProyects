@@ -9,7 +9,8 @@ const STORAGE = {
     queue: 'bookLibQueue',
     goal: 'bookLibGoal',
     theme: 'bookLibTheme',
-    lastBackup: 'bookLibLastBackup'
+    lastBackup: 'bookLibLastBackup',
+    undo: 'bookLibUndo'
 };
 
 let books = [];
@@ -24,3 +25,10 @@ let expandedCards = new Set();   // cards with their Summary & Notes open
 let collapsedSeries = new Set(); // series folders the user closed
 
 let chartInstances = { status: null, monthly: null, tags: null };
+
+let selectMode = false;          // Library "Select" mode (bulk edit)
+let selectedIds = new Set();
+let bulkFormats = new Set();
+
+let afRunning = false;           // auto-fill is working
+let afStop = false;

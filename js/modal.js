@@ -157,6 +157,7 @@ function handleFormSubmit(e) {
         finishedDates: [...tempDates].sort(),
         addedAt: existing ? existing.addedAt : Date.now()
     });
+    delete obj.autoMatch; // you looked at it, so it no longer needs reviewing
 
     if (existing) {
         books[books.findIndex(x => x.id === id)] = obj;
@@ -211,5 +212,6 @@ function initModal() {
     $('bookModal').addEventListener('click', e => { if (e.target === $('bookModal')) closeModal(); });
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && !$('bookModal').classList.contains('hidden')) closeModal();
+        if (e.key === 'Escape' && !$('bulkModal').classList.contains('hidden')) closeBulkModal();
     });
 }
